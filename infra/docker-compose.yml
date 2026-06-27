@@ -68,6 +68,20 @@ services:
     networks:
       - sdb
 
+  migrate:
+    profiles: ["migrate"]
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.migrate
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-supadupabase}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supadupabase}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sdb
+    restart: "no"
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -83,6 +97,7 @@ services:
       - sdb
 
   cloudflared:
+    profiles: ["tunnel"]
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     command: tunnel run

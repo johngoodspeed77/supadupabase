@@ -27,26 +27,35 @@ Set at minimum:
 
 ## 2. Build and start
 
+**One command (on the VM):**
+
+```bash
+chmod +x infra/deploy.sh
+cp infra/env.production.example .env
+# edit .env — set POSTGRES_PASSWORD, AUTH_SECRET, ADMIN_EMAILS, TUNNEL_TOKEN
+./infra/deploy.sh
+```
+
+**Manual steps:**
+
 ```bash
 npm install
 npm run build
-docker compose -f infra/docker-compose.yml up -d --build
-npm run migrate
+docker compose -f infra/docker-compose.yml --env-file .env up -d --build
+docker compose -f infra/docker-compose.yml --env-file .env --profile migrate run --rm migrate
+docker compose -f infra/docker-compose.yml --env-file .env --profile tunnel up -d cloudflared
 ```
+
+Use `infra/env.production.example` as the production `.env` template.
 
 ## 3. Cloudflare Tunnel
 
 1. Create tunnel in Cloudflare Zero Trust dashboard
-2. Copy tunnel token to `infra/cloudflared/.env` (not committed):
-
-   ```
-   TUNNEL_TOKEN=your-token
-   ```
-
+2. Copy tunnel token into **`TUNNEL_TOKEN`** in repo root `.env` (not committed)
 3. Route hostname `supadupabase.whitelynx.co.nz` → `http://caddy:80`
-4. Start `cloudflared` service (included in `docker-compose.yml`)
+4. `./infra/deploy.sh` starts cloudflared automatically when `TUNNEL_TOKEN` is set
 
-See [cloudflared/config.yml.example](./cloudflared/config.yml.example).
+See [DEPLOY_AT_HOME.md](./DEPLOY_AT_HOME.md) for the full home checklist.
 
 ## 4. Verify
 

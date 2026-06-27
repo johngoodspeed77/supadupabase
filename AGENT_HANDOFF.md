@@ -14,7 +14,7 @@
 
 ## Save point — v0.1.0-local-mvp (2026-06-27)
 
-**Current stage:** Local dev MVP **complete**. Code on GitHub. VM/tunnel **not deployed**.
+**Current stage:** Local dev MVP **complete**. **Deploy-ready** for Proxmox VM — see [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md). Not deployed yet.
 
 See [SAVEPOINT.md](./SAVEPOINT.md) for restore instructions and commit map.
 
@@ -31,8 +31,7 @@ See [SAVEPOINT.md](./SAVEPOINT.md) for restore instructions and commit map.
 
 ### Not started / deferred
 
-- [ ] Proxmox VM provision
-- [ ] Cloudflare Tunnel live
+- [ ] Proxmox VM provision → then run `./infra/deploy.sh` ([DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md))
 - [ ] Production Google OAuth + `.env` on VM
 - [ ] Integration tests (RLS + JWT)
 - [ ] Data API: RPC, anon/service key auth, more tables

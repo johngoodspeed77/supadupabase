@@ -18,6 +18,10 @@ router.get('/healthz', (ctx) => {
   jsonResponse(ctx, 200, { status: 'ok', service: 'data-api' });
 });
 
+router.get('/rest/healthz', (ctx) => {
+  jsonResponse(ctx, 200, { status: 'ok', service: 'data-api' });
+});
+
 router.get('/rest/v1/:table', async (ctx) => {
   const token = extractBearer(ctx.headers);
   if (!token) {

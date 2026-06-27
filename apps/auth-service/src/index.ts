@@ -37,6 +37,10 @@ router.get('/healthz', (_ctx) => {
   jsonResponse(_ctx, 200, { status: 'ok', service: 'auth-service' });
 });
 
+router.get('/auth/healthz', (_ctx) => {
+  jsonResponse(_ctx, 200, { status: 'ok', service: 'auth-service' });
+});
+
 router.post('/auth/signup', async (ctx) => {
   const body = ctx.body as { email?: string; password?: string } | null;
   const session = await signup(pool, config, body?.email ?? '', body?.password ?? '');

@@ -1,4 +1,4 @@
-const AUTH_URL = (window.__SDB_AUTH_URL ?? 'http://localhost:3001').replace(/\/$/, '');
+const AUTH_URL = (window.__SDB_AUTH_URL ?? window.location.origin).replace(/\/$/, '');
 
 const state = {
   accessToken: sessionStorage.getItem('sdb_access_token'),

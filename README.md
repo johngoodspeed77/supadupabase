@@ -61,8 +61,8 @@ npm run dev
 ## Production
 
 - **Domain:** `https://supadupabase.whitelynx.co.nz`
-- **OAuth redirect:** `https://supadupabase.whitelynx.co.nz/auth/callback/google`
-- **Deploy:** [infra/DEPLOY.md](./infra/DEPLOY.md) · [infra/PROXMOX.md](./infra/PROXMOX.md)
+- **Deploy at home:** [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) ← start here on the Proxmox VM
+- **Reference:** [infra/DEPLOY.md](./infra/DEPLOY.md) · [infra/PROXMOX.md](./infra/PROXMOX.md)
 
 ## Client usage
 
