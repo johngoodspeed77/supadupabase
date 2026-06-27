@@ -1,0 +1,233 @@
+import type {
+  SupaDupaBaseClientOptions,
+  AuthSession,
+  AuthUser,
+  SignInCredentials,
+  SignUpCredentials,
+  QueryResult,
+  InsertResult,
+} from './types.js';
+
+class QueryBuilder<T = Record<string, unknown>> {
+  private columns = '*';
+  private filters: Array<{ column: string; value: string }> = [];
+  private limitValue?: number;
+
+  constructor(
+    private readonly baseUrl: string,
+    private readonly table: string,
+    private getHeaders: () => Record<string, string>,
+  ) {}
+
+  select(columns = '*'): this {
+    this.columns = columns;
+    return this;
+  }
+
+  eq(column: string, value: string | number | boolean): this {
+    this.filters.push({ column, value: String(value) });
+    return this;
+  }
+
+  limit(count: number): this {
+    this.limitValue = count;
+    return this;
+  }
+
+  async execute(): Promise<QueryResult<T>> {
+    const params = new URLSearchParams({ select: this.columns });
+    for (const f of this.filters) {
+      params.set(f.column, `eq.${f.value}`);
+    }
+    if (this.limitValue !== undefined) {
+      params.set('limit', String(this.limitValue));
+    }
+
+    const res = await fetch(`${this.baseUrl}/rest/v1/${this.table}?${params}`, {
+      headers: this.getHeaders(),
+    });
+    const body = (await res.json()) as unknown;
+    if (!res.ok) {
+      const err = body as { message?: string };
+      return { data: null, error: { message: err.message ?? 'Query failed', status: res.status } };
+    }
+    return { data: body as T[], error: null };
+  }
+
+  async insert(rows: Partial<T> | Partial<T>[]): Promise<InsertResult<T>> {
+    const res = await fetch(`${this.baseUrl}/rest/v1/${this.table}`, {
+      method: 'POST',
+      headers: { ...this.getHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(rows),
+    });
+    const body = (await res.json()) as unknown;
+    if (!res.ok) {
+      const err = body as { message?: string };
+      return { data: null, error: { message: err.message ?? 'Insert failed', status: res.status } };
+    }
+    return { data: Array.isArray(body) ? (body as T[]) : [body as T], error: null };
+  }
+
+  async update(patch: Partial<T>): Promise<QueryResult<T>> {
+    const params = new URLSearchParams();
+    for (const f of this.filters) {
+      params.set(f.column, `eq.${f.value}`);
+    }
+    const res = await fetch(`${this.baseUrl}/rest/v1/${this.table}?${params}`, {
+      method: 'PATCH',
+      headers: { ...this.getHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    });
+    const body = (await res.json()) as unknown;
+    if (!res.ok) {
+      const err = body as { message?: string };
+      return { data: null, error: { message: err.message ?? 'Update failed', status: res.status } };
+    }
+    const rows = Array.isArray(body) ? body : [body];
+    return { data: rows as T[], error: null };
+  }
+
+  async delete(): Promise<QueryResult<T>> {
+    const params = new URLSearchParams();
+    for (const f of this.filters) {
+      params.set(f.column, `eq.${f.value}`);
+    }
+    const res = await fetch(`${this.baseUrl}/rest/v1/${this.table}?${params}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+    const body = (await res.json()) as unknown;
+    if (!res.ok) {
+      const err = body as { message?: string };
+      return { data: null, error: { message: err.message ?? 'Delete failed', status: res.status } };
+    }
+    return { data: body as T[], error: null };
+  }
+}
+
+export class SupaDupaBaseClient {
+  private accessToken: string | null;
+  private readonly anonKey?: string;
+
+  constructor(private readonly options: SupaDupaBaseClientOptions) {
+    this.accessToken = options.accessToken ?? null;
+    this.anonKey = options.anonKey;
+  }
+
+  private baseUrl(): string {
+    return optionsUrl(this.options.url);
+  }
+
+  private headers(): Record<string, string> {
+    const h: Record<string, string> = { Accept: 'application/json' };
+    if (this.anonKey) h.apikey = this.anonKey;
+    if (this.accessToken) h.Authorization = `Bearer ${this.accessToken}`;
+    return h;
+  }
+
+  from<T = Record<string, unknown>>(table: string): QueryBuilder<T> & {
+    select: QueryBuilder<T>['select'];
+    eq: QueryBuilder<T>['eq'];
+    limit: QueryBuilder<T>['limit'];
+    insert: QueryBuilder<T>['insert'];
+    update: QueryBuilder<T>['update'];
+    delete: QueryBuilder<T>['delete'];
+    then: Promise<QueryResult<T>>['then'];
+  } {
+    const builder = new QueryBuilder<T>(this.baseUrl(), table, () => this.headers());
+    return Object.assign(builder, {
+      then: (onfulfilled?: (value: QueryResult<T>) => unknown, onrejected?: (reason: unknown) => unknown) =>
+        builder.execute().then(onfulfilled, onrejected),
+    });
+  }
+
+  auth = {
+    signUp: async (credentials: SignUpCredentials): Promise<{ data: AuthSession | null; error: { message: string } | null }> => {
+      const res = await fetch(`${this.baseUrl()}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      const body = (await res.json()) as AuthSession & { message?: string };
+      if (!res.ok) return { data: null, error: { message: body.message ?? 'Sign up failed' } };
+      this.accessToken = body.access_token;
+      return { data: body, error: null };
+    },
+
+    signInWithPassword: async (
+      credentials: SignInCredentials,
+    ): Promise<{ data: AuthSession | null; error: { message: string } | null }> => {
+      const res = await fetch(`${this.baseUrl()}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      const body = (await res.json()) as AuthSession & { message?: string };
+      if (!res.ok) return { data: null, error: { message: body.message ?? 'Login failed' } };
+      this.accessToken = body.access_token;
+      return { data: body, error: null };
+    },
+
+    signOut: async (refreshToken?: string): Promise<{ error: { message: string } | null }> => {
+      const res = await fetch(`${this.baseUrl()}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      if (!res.ok) {
+        const body = (await res.json()) as { message?: string };
+        return { error: { message: body.message ?? 'Logout failed' } };
+      }
+      this.accessToken = null;
+      return { error: null };
+    },
+
+    getSession: async (): Promise<{ data: { user: AuthUser } | null; error: { message: string } | null }> => {
+      const res = await fetch(`${this.baseUrl()}/auth/me`, {
+        headers: this.headers(),
+      });
+      const body = (await res.json()) as { user?: AuthUser; message?: string };
+      if (!res.ok) return { data: null, error: { message: body.message ?? 'Not authenticated' } };
+      return { data: { user: body.user! }, error: null };
+    },
+
+    refreshSession: async (
+      refreshToken: string,
+    ): Promise<{ data: AuthSession | null; error: { message: string } | null }> => {
+      const res = await fetch(`${this.baseUrl()}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      const body = (await res.json()) as AuthSession & { message?: string };
+      if (!res.ok) return { data: null, error: { message: body.message ?? 'Refresh failed' } };
+      this.accessToken = body.access_token;
+      return { data: body, error: null };
+    },
+
+    signInWithGoogle: (opts: { redirectTo?: string } = {}): void => {
+      const params = new URLSearchParams();
+      if (opts.redirectTo) params.set('redirect_to', opts.redirectTo);
+      const qs = params.toString();
+      window.location.href = `${this.baseUrl()}/auth/signin/google${qs ? `?${qs}` : ''}`;
+    },
+  };
+
+  getAccessToken(): string | null {
+    return this.accessToken;
+  }
+
+  setAccessToken(token: string | null): void {
+    this.accessToken = token;
+  }
+}
+
+function optionsUrl(url: string): string {
+  return url.replace(/\/$/, '');
+}
+
+export function createClient(options: SupaDupaBaseClientOptions): SupaDupaBaseClient {
+  return new SupaDupaBaseClient(options);
+}
+
+export type { SupaDupaBaseClientOptions, AuthSession, AuthUser, QueryResult, InsertResult };
