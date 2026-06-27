@@ -109,13 +109,20 @@ export class SupaDupaBaseClient {
   private accessToken: string | null;
   private readonly anonKey?: string;
 
+  private readonly authUrl: string;
+
   constructor(private readonly options: SupaDupaBaseClientOptions) {
     this.accessToken = options.accessToken ?? null;
     this.anonKey = options.anonKey;
+    this.authUrl = optionsUrl(options.authUrl ?? options.url);
   }
 
   private baseUrl(): string {
     return optionsUrl(this.options.url);
+  }
+
+  private authBaseUrl(): string {
+    return this.authUrl;
   }
 
   private headers(): Record<string, string> {
@@ -143,7 +150,7 @@ export class SupaDupaBaseClient {
 
   auth = {
     signUp: async (credentials: SignUpCredentials): Promise<{ data: AuthSession | null; error: { message: string } | null }> => {
-      const res = await fetch(`${this.baseUrl()}/auth/signup`, {
+      const res = await fetch(`${this.authBaseUrl()}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(credentials),
@@ -157,7 +164,7 @@ export class SupaDupaBaseClient {
     signInWithPassword: async (
       credentials: SignInCredentials,
     ): Promise<{ data: AuthSession | null; error: { message: string } | null }> => {
-      const res = await fetch(`${this.baseUrl()}/auth/login`, {
+      const res = await fetch(`${this.authBaseUrl()}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(credentials),
@@ -169,7 +176,7 @@ export class SupaDupaBaseClient {
     },
 
     signOut: async (refreshToken?: string): Promise<{ error: { message: string } | null }> => {
-      const res = await fetch(`${this.baseUrl()}/auth/logout`, {
+      const res = await fetch(`${this.authBaseUrl()}/auth/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ refresh_token: refreshToken }),
@@ -183,7 +190,7 @@ export class SupaDupaBaseClient {
     },
 
     getSession: async (): Promise<{ data: { user: AuthUser } | null; error: { message: string } | null }> => {
-      const res = await fetch(`${this.baseUrl()}/auth/me`, {
+      const res = await fetch(`${this.authBaseUrl()}/auth/me`, {
         headers: this.headers(),
       });
       const body = (await res.json()) as { user?: AuthUser; message?: string };
@@ -194,7 +201,7 @@ export class SupaDupaBaseClient {
     refreshSession: async (
       refreshToken: string,
     ): Promise<{ data: AuthSession | null; error: { message: string } | null }> => {
-      const res = await fetch(`${this.baseUrl()}/auth/refresh`, {
+      const res = await fetch(`${this.authBaseUrl()}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ refresh_token: refreshToken }),
@@ -209,7 +216,7 @@ export class SupaDupaBaseClient {
       const params = new URLSearchParams();
       if (opts.redirectTo) params.set('redirect_to', opts.redirectTo);
       const qs = params.toString();
-      window.location.href = `${this.baseUrl()}/auth/signin/google${qs ? `?${qs}` : ''}`;
+      window.location.href = `${this.authBaseUrl()}/auth/signin/google${qs ? `?${qs}` : ''}`;
     },
   };
 

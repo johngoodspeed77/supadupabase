@@ -1,0 +1,99 @@
+# Production — SupaDupaBase on Proxmox VM
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-supadupabase}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-supadupabase}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-supadupabase}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sdb
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.node
+      args:
+        WORKSPACE: "@supadupabase/auth-service"
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-supadupabase}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supadupabase}
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER:-https://supadupabase.whitelynx.co.nz}
+      PUBLIC_URL: ${PUBLIC_URL:-https://supadupabase.whitelynx.co.nz}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      AUTH_PORT: "3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sdb
+
+  data-api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.node
+      args:
+        WORKSPACE: "@supadupabase/data-api"
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-supadupabase}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supadupabase}
+      AUTH_SECRET: ${AUTH_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER:-https://supadupabase.whitelynx.co.nz}
+      DATA_PORT: "3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sdb
+
+  admin:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.admin
+    restart: unless-stopped
+    environment:
+      ADMIN_PORT: "3003"
+    networks:
+      - sdb
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - auth-service
+      - data-api
+      - admin
+    networks:
+      - sdb
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN}
+    networks:
+      - sdb
+
+volumes:
+  postgres_data:
+
+networks:
+  sdb:
+    driver: bridge

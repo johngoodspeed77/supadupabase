@@ -8,9 +8,11 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "migrate": "npm run migrate -w @supadupabase/db",
+    "dev": "node scripts/dev.mjs",
     "dev:auth": "npm run dev -w @supadupabase/auth-service",
     "dev:data": "npm run dev -w @supadupabase/data-api",
-    "dev:admin": "npm run dev -w @supadupabase/admin"
+    "dev:admin": "npm run dev -w @supadupabase/admin",
+    "dev:sample": "npm run dev -w @supadupabase/sample-pwa"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

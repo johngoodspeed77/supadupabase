@@ -1,0 +1,14 @@
+{
+  "name": "@supadupabase/sample-pwa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@supadupabase/sdk": "*"
+  }
+}

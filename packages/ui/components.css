@@ -121,6 +121,19 @@
   border: 1px solid var(--sdb-border);
 }
 
+.sdb-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sdb-form-row .sdb-input {
+  flex: 1;
+  min-width: 120px;
+}
+
 .sdb-alert {
   padding: 0.75rem 1rem;
   border-radius: var(--sdb-radius);

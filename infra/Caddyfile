@@ -1,0 +1,19 @@
+:80 {
+	encode gzip
+
+	handle /auth/* {
+		reverse_proxy auth-service:3001
+	}
+
+	handle /rest/* {
+		reverse_proxy data-api:3002
+	}
+
+	handle /admin* {
+		reverse_proxy admin:3003
+	}
+
+	handle {
+		redir /admin/ permanent
+	}
+}

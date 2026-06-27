@@ -32,5 +32,6 @@ coverage/
 infra/data/
 
 # Cloudflare / TLS secrets (never commit)
-infra/cloudflared/*.json
+  infra/cloudflared/.env
+  infra/cloudflared/credentials.json
 infra/caddy/certs/

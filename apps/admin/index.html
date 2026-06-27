@@ -32,11 +32,9 @@
         <section id="view-projects" class="sdb-view">
           <div class="sdb-main__header">
             <h1>Projects</h1>
-            <p class="sdb-muted">Manage SupaDupaBase projects and allowed origins.</p>
+            <p class="sdb-muted">SupaDupaBase projects and allowed origins.</p>
           </div>
           <div class="sdb-card">
-            <h2 class="sdb-card__title">Default project</h2>
-            <p class="sdb-muted">Seeded for local development. Production project management coming soon.</p>
             <table class="sdb-table">
               <thead>
                 <tr>
@@ -45,12 +43,8 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>Default</td>
-                  <td><code>default</code></td>
-                  <td><span class="sdb-badge">active</span></td>
-                </tr>
+              <tbody id="projects-body">
+                <tr><td colspan="3" class="sdb-muted">Loading…</td></tr>
               </tbody>
             </table>
           </div>
@@ -59,7 +53,7 @@
         <section id="view-users" class="sdb-view" hidden>
           <div class="sdb-main__header">
             <h1>Users</h1>
-            <p class="sdb-muted">Authenticated users appear here once the auth service is connected.</p>
+            <p class="sdb-muted">Registered auth users.</p>
           </div>
           <div id="users-content" class="sdb-card">
             <div class="sdb-hex-loader" aria-label="Loading"></div>
@@ -69,17 +63,26 @@
         <section id="view-keys" class="sdb-view" hidden>
           <div class="sdb-main__header">
             <h1>API Keys</h1>
-            <p class="sdb-muted">Service and anon keys are stored hashed in Postgres.</p>
+            <p class="sdb-muted">Anon and service-role keys (hashed at rest).</p>
           </div>
-          <div class="sdb-card">
-            <p class="sdb-dim">Key management UI — Phase 2. Use auth service POST /auth/api-keys when implemented.</p>
+          <div id="keys-content" class="sdb-card">
+            <form id="create-key-form" class="sdb-form-row">
+              <input class="sdb-input" id="key-name" placeholder="Key name" required />
+              <select class="sdb-input" id="key-role">
+                <option value="anon">anon</option>
+                <option value="service_role">service_role</option>
+              </select>
+              <button class="sdb-btn sdb-btn--primary" type="submit">Create key</button>
+            </form>
+            <div id="new-key-result" class="sdb-alert sdb-alert--success" hidden></div>
+            <div data-keys-list style="margin-top: 1rem"></div>
           </div>
         </section>
 
         <section id="view-login" class="sdb-view" hidden>
           <div class="sdb-main__header">
             <h1>Sign in</h1>
-            <p class="sdb-muted">Email/password against the local auth service.</p>
+            <p class="sdb-muted">Admin email must be listed in ADMIN_EMAILS.</p>
           </div>
           <form id="login-form" class="sdb-card" style="max-width: 420px">
             <label class="sdb-label" for="email">Email</label>

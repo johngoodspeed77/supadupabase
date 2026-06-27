@@ -1,0 +1,10 @@
+# Cloudflare Tunnel — example config (token-based run preferred via TUNNEL_TOKEN in compose)
+#
+# If using config file instead of TUNNEL_TOKEN:
+# tunnel: <tunnel-uuid>
+# credentials-file: /etc/cloudflared/credentials.json
+#
+# ingress:
+#   - hostname: supadupabase.whitelynx.co.nz
+#     service: http://caddy:80
+#   - service: http_status:404

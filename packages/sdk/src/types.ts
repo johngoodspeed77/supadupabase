@@ -1,5 +1,8 @@
 export interface SupaDupaBaseClientOptions {
+  /** Data API base URL (REST). In production, same host as auth behind Caddy. */
   url: string;
+  /** Auth service URL. Defaults to `url` when omitted. */
+  authUrl?: string;
   anonKey?: string;
   accessToken?: string;
 }

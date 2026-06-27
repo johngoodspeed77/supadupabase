@@ -1,0 +1,46 @@
+:root {
+  --bg: #06080c;
+  --card: #111827;
+  --cyan: #22d3ee;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='25' viewBox='0 0 42 25'%3E%3Cg fill='none' stroke='%2322d3ee' stroke-opacity='0.08' stroke-width='0.75'%3E%3Cpolygon points='28,12.124 21,24.248 7,24.248 0,12.124 7,0 21,0'/%3E%3Cpolygon points='49,12.124 42,24.248 28,24.248 21,12.124 28,0 42,0'/%3E%3Cpolygon points='17.5,24.248 10.5,36.372 -3.5,36.372 -10.5,24.248 -3.5,12.124 10.5,12.124'/%3E%3Cpolygon points='38.5,24.248 31.5,36.372 17.5,36.372 10.5,24.248 17.5,12.124 31.5,12.124'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 42px 25px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #1e3a4a;
+}
+
+.brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+.hex {
+  width: 20px; height: 20px; background: var(--cyan);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+main { max-width: 720px; margin: 2rem auto; padding: 0 1rem; display: grid; gap: 1rem; }
+.card { background: var(--card); border: 1px solid #1e3a4a; border-radius: 8px; padding: 1.25rem; }
+.muted { color: var(--muted); }
+.error { color: #f87171; margin-top: 0.75rem; }
+
+input, button {
+  display: block; width: 100%; margin: 0.4rem 0; padding: 0.6rem 0.75rem;
+  border-radius: 6px; border: 1px solid #1e3a4a; background: #0b1018; color: var(--text);
+}
+
+button { cursor: pointer; background: var(--cyan); color: #041016; border: none; font-weight: 600; }
+button.ghost { background: transparent; color: var(--cyan); border: 1px solid var(--cyan); }
+
+pre { background: #0b1018; padding: 0.75rem; overflow: auto; border-radius: 6px; }
