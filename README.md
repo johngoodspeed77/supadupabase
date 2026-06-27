@@ -1,97 +1,80 @@
-# SupaDupaBase
-
-Self-hosted backend for access control and user data storage — a Supabase-inspired platform you run on your own infrastructure.
-
-Use it from websites and PWAs via `@supadupabase/sdk`: email/password auth, Google sign-in, Postgres-backed data with row-level security (RLS), and project-scoped API keys.
-
-## Status
-
-**Planning / early scaffold** — repository and docs exist; application code not yet implemented.
-
-See [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) for full architecture, decisions, and implementation order (for humans and AI agents).
-
-## What it provides
-
-| Capability | Description |
-|------------|-------------|
-| Auth | Email/password + Google OAuth, sessions, JWT, refresh tokens |
-| Data API | REST CRUD over Postgres with RLS enforced per user |
-| SDK | `@supadupabase/sdk` for web apps and PWAs |
-| Admin | Dashboard for projects, users, and API keys |
-| Deploy | Docker Compose on a dedicated Proxmox VM, public access via Cloudflare Tunnel |
-
-## Architecture (high level)
-
-```
-PWA / Website → Cloudflare → cloudflared → Caddy → auth-service | data-api | admin → PostgreSQL
-```
-
-- **Auth service** — Better Auth, issues JWTs with `sub`, `role`, `project_id`
-- **Data API** — Hono; verifies JWT, runs queries as the authenticated user; RLS applies in Postgres
-- **Postgres** — source of truth; policies use `auth.uid()` pattern (Supabase-style)
-
-## Planned monorepo layout
-
-```
-supadupabase/
-  apps/
-    auth-service/
-    data-api/
-    admin/
-  packages/
-    db/           # Drizzle schema, migrations, RLS SQL
-    sdk/          # @supadupabase/sdk
-    shared/
-  infra/
-    docker-compose.yml
-    Caddyfile
-```
-
-## Infrastructure (decided)
-
-- **Host**: New dedicated full VM on Proxmox (Ubuntu 24.04, 4 vCPU, 8 GB RAM, 40 GB disk)
-- **Public access**: Cloudflare Tunnel (no router port forwarding)
-- **Reverse proxy**: Caddy
-- **Secrets**: `.env` on VM only — never committed
-
-## Local development (once scaffolded)
-
-```bash
-cd supadupabase
-pnpm install
-docker compose -f infra/docker-compose.dev.yml up -d
-pnpm db:migrate
-pnpm dev
-```
-
-## Client usage (target API)
-
-```ts
-import { createClient } from '@supadupabase/sdk'
-
-const client = createClient({
-  url: 'https://supadupabase.whitelynx.co.nz',
-  anonKey: process.env.SUPADUPABASE_ANON_KEY!,
-})
-
-await client.auth.signInWithGoogle({ redirectTo: window.location.origin })
-const { data } = await client.from('profiles').select('*')
-```
-
-## Google OAuth setup
-
-1. Google Cloud Console → OAuth 2.0 Web client
-2. Redirect URI: `https://supadupabase.whitelynx.co.nz/auth/callback/google`
-3. JavaScript origins: your PWA/site URLs + `http://localhost:5173` for dev
-4. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in production `.env`
-
-## Security principles
-
-- Never expose **service-role** keys in browser code
-- All data API queries must be parameterized — no raw SQL from clients
-- RLS is the enforcement layer; test with real JWT contexts
-- UFW on VM: no inbound 80/443 from WAN; tunnel only
-
-## License
-
-TBD
+# SupaDupaBase
+
+Self-hosted backend for access control and user data storage — a Supabase-inspired platform you run on your own infrastructure.
+
+Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plain SQL migrations, and a zero-dep client SDK. Admin UI uses a **dark Cyan Hexagons** theme.
+
+## Status
+
+**Planning / early scaffold** — docs and repo layout; application code not yet implemented.
+
+See [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) for architecture and [docs/IN_HOUSE.md](./docs/IN_HOUSE.md) for the dependency policy.
+
+## What it provides
+
+| Capability | Description |
+|------------|-------------|
+| Auth | In-house email/password + Google OAuth, JWT, sessions |
+| Data API | In-house REST over Postgres with RLS per user |
+| SDK | `@supadupabase/sdk` — fetch only, no runtime deps |
+| Admin | Dark **Cyan Hexagons** dashboard (HTML + CSS + vanilla JS) |
+| Deploy | Docker Compose on Proxmox, public via Cloudflare Tunnel |
+
+## In-house stack
+
+| Layer | Implementation |
+|-------|----------------|
+| HTTP | `packages/server` — Node `http` + tiny router |
+| Auth | Scrypt (`node:crypto`) + JWT (`node:crypto` HMAC) |
+| Google login | In-house OAuth code flow (`fetch` to Google) |
+| Database | PostgreSQL 16 + plain SQL migrations |
+| Server deps | **`pg` only** |
+| Admin UI | `packages/ui` — Cyan Hexagons CSS, no React/Tailwind |
+| SDK | Zero runtime dependencies |
+
+## Architecture
+
+```
+PWA / Website → Cloudflare → cloudflared → Caddy → auth-service | data-api | admin → PostgreSQL
+```
+
+**Production URL:** `https://supadupabase.whitelynx.co.nz`
+
+## Planned layout
+
+```
+supadupabase/
+  apps/     auth-service, data-api, admin
+  packages/ server, db, sdk, shared, ui
+  docs/     IN_HOUSE.md, THEME.md
+  infra/    docker-compose, Caddyfile
+```
+
+## Theme
+
+Dark mode only. Cyan accents (`#22d3ee`) on charcoal backgrounds with a hexagon grid pattern. Details: [docs/THEME.md](./docs/THEME.md).
+
+## Client usage (target)
+
+```ts
+import { createClient } from '@supadupabase/sdk'
+
+const client = createClient({
+  url: 'https://supadupabase.whitelynx.co.nz',
+  anonKey: process.env.SUPADUPABASE_ANON_KEY!,
+})
+
+await client.auth.signInWithGoogle({ redirectTo: window.location.origin })
+const { data } = await client.from('profiles').select('*')
+```
+
+## Google OAuth
+
+Redirect URI: `https://supadupabase.whitelynx.co.nz/auth/callback/google`
+
+Implemented in-house in the auth service — no third-party auth library.
+
+## License
+
+TBD
+

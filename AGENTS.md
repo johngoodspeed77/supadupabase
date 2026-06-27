@@ -1,29 +1,23 @@
 # Agent instructions
 
-For full project context, decisions, and implementation order, read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first.
+Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first.
 
-## Quick reference
+## Non-negotiables
 
-- **Product:** SupaDupaBase — self-hosted auth + Postgres data API for websites/PWAs
-- **Stage:** Planning done; code not started
-- **Stack:** Node 22, TypeScript, pnpm monorepo, Better Auth, Hono, Drizzle, Postgres RLS, Docker, Caddy, Cloudflare Tunnel
-- **Deploy:** New dedicated Proxmox full VM (not the existing shared VM)
-
-## When implementing
-
-1. Follow the implementation order in `AGENT_HANDOFF.md`
-2. Never commit secrets (`.env`, tunnel tokens, OAuth credentials)
-3. Never expose service-role API keys to client/browser code
-4. Use parameterized queries only in the data API
-5. Test RLS with real JWT contexts
+1. **In-house first** — [docs/IN_HOUSE.md](./docs/IN_HOUSE.md). Server runtime dep: `pg` only. No Better Auth, Drizzle, Hono, React, Tailwind.
+2. **Cyan Hexagons theme** — [docs/THEME.md](./docs/THEME.md) for admin and first-party UI. Dark mode only.
+3. **Never** commit secrets or expose service-role keys to browsers.
+4. **Parameterized queries only** in the data API.
 
 ## Key packages
 
 | Path | Role |
 |------|------|
-| `apps/auth-service` | Email + Google auth, JWT |
-| `apps/data-api` | REST CRUD with RLS |
-| `apps/admin` | Admin dashboard |
-| `packages/db` | Schema and migrations |
+| `packages/server` | In-house HTTP router |
+| `packages/shared` | JWT, scrypt, types |
+| `packages/db` | SQL migrations |
+| `packages/ui` | Cyan Hexagons CSS |
 | `packages/sdk` | `@supadupabase/sdk` |
-| `infra/` | Docker Compose, Caddy, cloudflared |
+| `apps/auth-service` | Auth + Google OAuth |
+| `apps/data-api` | REST + RLS |
+| `apps/admin` | Static admin UI |
