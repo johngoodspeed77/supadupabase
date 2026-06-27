@@ -1,0 +1,21 @@
+{
+  "name": "supadupabase",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "migrate": "npm run migrate -w @supadupabase/db",
+    "dev:auth": "npm run dev -w @supadupabase/auth-service",
+    "dev:data": "npm run dev -w @supadupabase/data-api",
+    "dev:admin": "npm run dev -w @supadupabase/admin"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
