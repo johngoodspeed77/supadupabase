@@ -8,7 +8,7 @@ import type {
   InsertResult,
 } from './types.js';
 
-class QueryBuilder<T = Record<string, unknown>> {
+class QueryBuilder<T = Record<string, unknown>> implements PromiseLike<QueryResult<T>> {
   private columns = '*';
   private filters: Array<{ column: string; value: string }> = [];
   private limitValue?: number;
@@ -32,6 +32,13 @@ class QueryBuilder<T = Record<string, unknown>> {
   limit(count: number): this {
     this.limitValue = count;
     return this;
+  }
+
+  then<TResult1 = QueryResult<T>, TResult2 = never>(
+    onfulfilled?: ((value: QueryResult<T>) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
+  ): Promise<TResult1 | TResult2> {
+    return this.execute().then(onfulfilled, onrejected);
   }
 
   async execute(): Promise<QueryResult<T>> {
@@ -132,20 +139,8 @@ export class SupaDupaBaseClient {
     return h;
   }
 
-  from<T = Record<string, unknown>>(table: string): QueryBuilder<T> & {
-    select: QueryBuilder<T>['select'];
-    eq: QueryBuilder<T>['eq'];
-    limit: QueryBuilder<T>['limit'];
-    insert: QueryBuilder<T>['insert'];
-    update: QueryBuilder<T>['update'];
-    delete: QueryBuilder<T>['delete'];
-    then: Promise<QueryResult<T>>['then'];
-  } {
-    const builder = new QueryBuilder<T>(this.baseUrl(), table, () => this.headers());
-    return Object.assign(builder, {
-      then: (onfulfilled?: (value: QueryResult<T>) => unknown, onrejected?: (reason: unknown) => unknown) =>
-        builder.execute().then(onfulfilled, onrejected),
-    });
+  from<T = Record<string, unknown>>(table: string): QueryBuilder<T> {
+    return new QueryBuilder<T>(this.baseUrl(), table, () => this.headers());
   }
 
   auth = {
