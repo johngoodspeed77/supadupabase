@@ -1,0 +1,141 @@
+.sdb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-family: var(--sdb-font);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--sdb-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.sdb-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--sdb-bg), 0 0 0 4px var(--sdb-cyan-500);
+}
+
+.sdb-btn--primary {
+  background: var(--sdb-cyan-600);
+  color: var(--sdb-bg-deep);
+  border-color: var(--sdb-cyan-500);
+}
+
+.sdb-btn--primary:hover {
+  background: var(--sdb-cyan-500);
+}
+
+.sdb-btn--ghost {
+  background: transparent;
+  color: var(--sdb-cyan-300);
+  border-color: var(--sdb-border);
+}
+
+.sdb-btn--ghost:hover {
+  background: var(--sdb-bg-hover);
+  border-color: var(--sdb-cyan-700);
+}
+
+.sdb-btn--danger {
+  background: transparent;
+  color: var(--sdb-error);
+  border-color: var(--sdb-error);
+}
+
+.sdb-card {
+  background: var(--sdb-bg-raised);
+  border: 1px solid var(--sdb-border);
+  border-radius: var(--sdb-radius);
+  padding: 1.25rem;
+  box-shadow: 0 0 0 1px var(--sdb-border-bright) inset;
+}
+
+.sdb-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--sdb-text);
+}
+
+.sdb-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--sdb-font);
+  font-size: 0.875rem;
+  color: var(--sdb-text);
+  background: var(--sdb-bg);
+  border: 1px solid var(--sdb-border);
+  border-radius: var(--sdb-radius);
+}
+
+.sdb-input:focus {
+  outline: none;
+  border-color: var(--sdb-cyan-600);
+  box-shadow: 0 0 0 2px var(--sdb-bg), 0 0 0 4px var(--sdb-cyan-500);
+}
+
+.sdb-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--sdb-text-muted);
+}
+
+.sdb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.sdb-table th,
+.sdb-table td {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--sdb-border);
+}
+
+.sdb-table th {
+  color: var(--sdb-text-muted);
+  font-weight: 500;
+  background: var(--sdb-bg);
+}
+
+.sdb-table tbody tr:nth-child(even) {
+  background: var(--sdb-bg-raised);
+}
+
+.sdb-table tbody tr:hover {
+  background: var(--sdb-bg-hover);
+}
+
+.sdb-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: var(--sdb-radius-hex);
+  background: var(--sdb-bg-hover);
+  color: var(--sdb-cyan-300);
+  border: 1px solid var(--sdb-border);
+}
+
+.sdb-alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--sdb-radius);
+  border: 1px solid var(--sdb-border);
+  font-size: 0.875rem;
+}
+
+.sdb-alert--error {
+  color: var(--sdb-error);
+  border-color: var(--sdb-error);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.sdb-alert--success {
+  color: var(--sdb-success);
+  border-color: var(--sdb-success);
+  background: rgba(52, 211, 153, 0.08);
+}

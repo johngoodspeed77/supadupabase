@@ -1,0 +1,111 @@
+:root {
+  --sdb-bg-deep: #06080c;
+  --sdb-bg: #0b1018;
+  --sdb-bg-raised: #111827;
+  --sdb-bg-hover: #1a2332;
+  --sdb-border: #1e3a4a;
+  --sdb-border-bright: #22d3ee33;
+
+  --sdb-cyan-100: #e0fcff;
+  --sdb-cyan-300: #67e8f9;
+  --sdb-cyan-500: #22d3ee;
+  --sdb-cyan-600: #06b6d4;
+  --sdb-cyan-700: #0891b2;
+  --sdb-glow: #22d3ee66;
+
+  --sdb-text: #e2e8f0;
+  --sdb-text-muted: #94a3b8;
+  --sdb-text-dim: #64748b;
+
+  --sdb-success: #34d399;
+  --sdb-warning: #fbbf24;
+  --sdb-error: #f87171;
+
+  --sdb-radius: 8px;
+  --sdb-radius-hex: 4px;
+  --sdb-font: system-ui, "Segoe UI", Roboto, sans-serif;
+  --sdb-font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  /* Tessellated honeycomb tile (flat-top, r=14) */
+  --sdb-hex-tile-w: 42px;
+  --sdb-hex-tile-h: 25px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--sdb-font);
+  color: var(--sdb-text);
+  background-color: var(--sdb-bg-deep);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tessellated flat-top honeycomb (see docs/THEME.md) */
+.sdb-shell {
+  min-height: 100vh;
+  background-color: var(--sdb-bg-deep);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='25' viewBox='0 0 42 25'%3E%3Cg fill='none' stroke='%2322d3ee' stroke-opacity='0.08' stroke-width='0.75' vector-effect='non-scaling-stroke'%3E%3Cpolygon points='28,12.124 21,24.248 7,24.248 0,12.124 7,0 21,0'/%3E%3Cpolygon points='49,12.124 42,24.248 28,24.248 21,12.124 28,0 42,0'/%3E%3Cpolygon points='17.5,24.248 10.5,36.372 -3.5,36.372 -10.5,24.248 -3.5,12.124 10.5,12.124'/%3E%3Cpolygon points='38.5,24.248 31.5,36.372 17.5,36.372 10.5,24.248 17.5,12.124 31.5,12.124'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: var(--sdb-hex-tile-w) var(--sdb-hex-tile-h);
+  background-repeat: repeat;
+  background-position: 0 0;
+}
+
+a {
+  color: var(--sdb-cyan-300);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--sdb-cyan-500);
+}
+
+code,
+pre {
+  font-family: var(--sdb-font-mono);
+}
+
+.sdb-hex-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--sdb-cyan-500);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  box-shadow: 0 0 12px var(--sdb-glow);
+}
+
+.sdb-hex-loader {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--sdb-border);
+  border-top-color: var(--sdb-cyan-500);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  animation: sdb-spin 0.9s linear infinite;
+}
+
+@keyframes sdb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sdb-muted {
+  color: var(--sdb-text-muted);
+}
+
+.sdb-dim {
+  color: var(--sdb-text-dim);
+}
