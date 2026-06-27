@@ -22,7 +22,7 @@
 
 
 
-**Current stage:** Planning complete; repo scaffold + docs. **No application code yet.**
+**Current stage:** Local dev MVP — monorepo packages, auth/data services, SDK, admin shell, SQL migrations. VM/tunnel deployment deferred.
 
 
 
@@ -300,6 +300,6 @@ Flow: verify JWT → set Postgres session claims → parameterized query → RLS
 
 
 
-2026-06-27 — In-house dependency policy + Cyan Hexagons dark theme (tessellated honeycomb) confirmed.
+2026-06-27 — Local dev MVP scaffold (packages, apps, migrations, DEV.md).
 
 

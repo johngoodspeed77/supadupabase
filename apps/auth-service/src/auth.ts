@@ -81,7 +81,15 @@ export async function signup(
     [email.toLowerCase(), passwordHash],
   );
 
-  return createSession(pool, config, result.rows[0]);
+  const user = result.rows[0];
+  await pool.query(
+    `INSERT INTO public.profiles (id, project_id, display_name)
+     VALUES ($1, '00000000-0000-0000-0000-000000000001', $2)
+     ON CONFLICT (id, project_id) DO NOTHING`,
+    [user.id, email.split('@')[0]],
+  );
+
+  return createSession(pool, config, user);
 }
 
 export async function login(
@@ -252,6 +260,12 @@ export async function handleGoogleCallback(
       [info.email.toLowerCase(), info.sub],
     );
     user = inserted.rows[0];
+    await pool.query(
+      `INSERT INTO public.profiles (id, project_id, display_name)
+       VALUES ($1, '00000000-0000-0000-0000-000000000001', $2)
+       ON CONFLICT (id, project_id) DO NOTHING`,
+      [user.id, info.email.split('@')[0]],
+    );
   }
 
   return createSession(pool, config, user);

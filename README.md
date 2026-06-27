@@ -12,13 +12,13 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 
 ## Status
 
+**Local dev MVP** — monorepo scaffold, auth service, data API, SDK, admin shell, and SQL migrations.
 
+See [DEV.md](./DEV.md) for local start commands, [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) for architecture, and [docs/IN_HOUSE.md](./docs/IN_HOUSE.md) for the dependency policy.
 
-**Planning / early scaffold** — docs and repo layout; application code not yet implemented.
+## Local development
 
-
-
-See [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) for architecture and [docs/IN_HOUSE.md](./docs/IN_HOUSE.md) for the dependency policy.
+Quick start: [DEV.md](./DEV.md)
 
 
 

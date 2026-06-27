@@ -21,6 +21,14 @@ import {
   bearerToken,
 } from './auth.js';
 
+import {
+  requireAdmin,
+  listProjects,
+  listUsers,
+  listApiKeys,
+  createApiKey,
+} from './admin.js';
+
 const config = loadConfig();
 const pool = createPool(config.databaseUrl);
 const router = new Router();
@@ -115,6 +123,60 @@ router.get('/auth/callback/google', async (ctx) => {
     } else {
       throw err;
     }
+  }
+});
+
+router.get('/admin/projects', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const projects = await listProjects(pool);
+    jsonResponse(ctx, 200, { projects });
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.get('/admin/users', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const users = await listUsers(pool);
+    jsonResponse(ctx, 200, { users });
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.get('/admin/api-keys', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const keys = await listApiKeys(pool);
+    jsonResponse(ctx, 200, { keys });
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.post('/auth/api-keys', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const body = ctx.body as {
+      project_id?: string;
+      name?: string;
+      role?: 'anon' | 'service_role';
+    } | null;
+    const key = await createApiKey(
+      pool,
+      body?.project_id ?? '00000000-0000-0000-0000-000000000001',
+      body?.name ?? 'API Key',
+      body?.role ?? 'anon',
+    );
+    jsonResponse(ctx, 201, key);
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
   }
 });
 
