@@ -1,4 +1,4 @@
-import { formatHours, formatWeekRange, type WeekCalc } from './hours.js';
+import { formatDateNz, formatHours, formatWeekRange, type WeekCalc } from './hours.js';
 
 function esc(s: string): string {
   return s
@@ -15,12 +15,12 @@ export function buildTimesheetEmail(
   week: WeekCalc,
 ): { subject: string; html: string; text: string } {
   const range = formatWeekRange(weekStart);
-  const subject = `Timesheet — ${employeeName} — Week of ${weekStart}`;
+  const subject = `Timesheet — ${employeeName} — Week of ${formatDateNz(weekStart)}`;
 
   const rows = week.days
     .map(
       (d) => `<tr>
-        <td>${esc(d.workDate)}</td>
+        <td>${esc(formatDateNz(d.workDate))}</td>
         <td>${esc(d.dayName)}</td>
         <td>${esc(d.startTime)}</td>
         <td>${esc(d.endTime)}</td>
@@ -75,7 +75,7 @@ export function buildTimesheetEmail(
 
   for (const d of week.days) {
     textLines.push(
-      `${d.workDate} ${d.dayName.padEnd(10)} ${d.startTime}  ${d.endTime}  ${formatHours(d.worked).padStart(5)} ${formatHours(d.regular).padStart(5)} ${formatHours(d.dailyOt).padStart(5)} ${String(d.rate).padStart(4)} ${formatHours(d.totalPaid).padStart(5)}`,
+      `${formatDateNz(d.workDate).padEnd(10)} ${d.dayName.padEnd(10)} ${d.startTime}  ${d.endTime}  ${formatHours(d.worked).padStart(5)} ${formatHours(d.regular).padStart(5)} ${formatHours(d.dailyOt).padStart(5)} ${String(d.rate).padStart(4)} ${formatHours(d.totalPaid).padStart(5)}`,
     );
   }
 
@@ -85,4 +85,24 @@ export function buildTimesheetEmail(
   );
 
   return { subject, html, text: textLines.join('\n') };
+}
+
+export function buildTestEmail(): { subject: string; html: string; text: string } {
+  const subject = 'SupaDupaBase — test email';
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${esc(subject)}</title></head>
+<body style="font-family:system-ui,sans-serif;color:#111;">
+  <h1>SupaDupaBase</h1>
+  <p>This is a test email from your SupaDupaBase mail service.</p>
+  <p style="color:#64748b;font-size:12px;">If you received this, SMTP is configured correctly.</p>
+</body>
+</html>`;
+  const text = [
+    'SupaDupaBase',
+    '',
+    'This is a test email from your SupaDupaBase mail service.',
+    'If you received this, SMTP is configured correctly.',
+  ].join('\n');
+  return { subject, html, text };
 }

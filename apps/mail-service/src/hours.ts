@@ -32,6 +32,17 @@ export function formatHours(n: number): string {
   return n.toFixed(2);
 }
 
+function normalizeDate(value: string): string {
+  return value.length >= 10 ? value.slice(0, 10) : value;
+}
+
+/** New Zealand display format DD/MM/YYYY. */
+export function formatDateNz(isoDate: string): string {
+  const iso = normalizeDate(isoDate);
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 export function dayRate(workDate: string): number {
   const d = new Date(`${workDate}T12:00:00`);
   const dow = d.getDay();
@@ -116,5 +127,5 @@ export function calcWeek(
 
 export function formatWeekRange(weekStart: string): string {
   const end = addDays(weekStart, 6);
-  return `${weekStart} to ${end}`;
+  return `${formatDateNz(weekStart)} to ${formatDateNz(end)}`;
 }
