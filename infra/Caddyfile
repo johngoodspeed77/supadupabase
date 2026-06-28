@@ -9,11 +9,27 @@
 		reverse_proxy data-api:3002
 	}
 
-	handle /admin* {
+	handle /mail/* {
+		reverse_proxy mail-service:3004
+	}
+
+	handle /admin/projects {
+		reverse_proxy auth-service:3001
+	}
+
+	handle /admin/users {
+		reverse_proxy auth-service:3001
+	}
+
+	handle /admin/api-keys {
+		reverse_proxy auth-service:3001
+	}
+
+	handle_path /admin/* {
 		reverse_proxy admin:3003
 	}
 
 	handle {
-		redir /admin/ permanent
+		redir * /admin/ 308
 	}
 }

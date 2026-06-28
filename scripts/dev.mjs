@@ -9,6 +9,7 @@ const services = [
   { name: 'auth', script: 'dev:auth' },
   { name: 'data', script: 'dev:data' },
   { name: 'admin', script: 'dev:admin' },
+  { name: 'mail', script: 'dev:mail' },
   { name: 'sample', script: 'dev:sample' },
 ];
 
@@ -33,4 +34,4 @@ function shutdown() {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-console.log('SupaDupaBase dev: auth :3001, data :3002, admin :3003, sample :5173');
+console.log('SupaDupaBase dev: auth :3001, data :3002, admin :3003, mail :3004, sample :5173');

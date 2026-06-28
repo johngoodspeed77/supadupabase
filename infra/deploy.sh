@@ -27,7 +27,7 @@ echo "==> Pull latest (optional)"
 git pull --ff-only 2>/dev/null || true
 
 echo "==> Build and start core stack"
-$COMPOSE up -d --build postgres auth-service data-api admin caddy
+$COMPOSE up -d --build postgres auth-service data-api mail-service admin caddy
 
 echo "==> Wait for Postgres"
 sleep 5

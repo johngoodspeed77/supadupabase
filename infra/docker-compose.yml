@@ -58,6 +58,30 @@ services:
     networks:
       - sdb
 
+  mail-service:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.node
+      args:
+        WORKSPACE: "@supadupabase/mail-service"
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-supadupabase}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supadupabase}
+      AUTH_SECRET: ${AUTH_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER:-https://supadupabase.whitelynx.co.nz}
+      MAIL_PORT: "3004"
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sdb
+
   admin:
     build:
       context: ..
@@ -92,6 +116,7 @@ services:
     depends_on:
       - auth-service
       - data-api
+      - mail-service
       - admin
     networks:
       - sdb
@@ -102,7 +127,7 @@ services:
     restart: unless-stopped
     command: tunnel run
     environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN}
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
     networks:
       - sdb
 

@@ -43,7 +43,12 @@ export function verifyAccessToken(
 }
 
 /** Tables exposed via REST in MVP */
-export const ALLOWED_TABLES = new Set(['profiles']);
+export const ALLOWED_TABLES = new Set([
+  'profiles',
+  'user_settings',
+  'time_entries',
+  'week_submissions',
+]);
 
 export function assertAllowedTable(table: string): void {
   if (!ALLOWED_TABLES.has(table)) {
