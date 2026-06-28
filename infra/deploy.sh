@@ -5,7 +5,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-COMPOSE="docker compose -f infra/docker-compose.yml --env-file .env"
+if [[ "${DOCKER_SUDO:-}" == "1" ]] || ! groups | grep -q '\bdocker\b'; then
+  COMPOSE="sudo docker compose -f infra/docker-compose.yml --env-file .env"
+else
+  COMPOSE="docker compose -f infra/docker-compose.yml --env-file .env"
+fi
 
 if [[ ! -f .env ]]; then
   echo "Missing .env — copy .env.example and set secrets first."
