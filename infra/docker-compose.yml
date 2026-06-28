@@ -98,7 +98,8 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.migrate
-    command: ["node", "packages/db/dist/migrate.js"]
+    entrypoint: ["node"]
+    command: ["packages/db/dist/migrate.js"]
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-supadupabase}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supadupabase}
     depends_on:

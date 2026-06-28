@@ -16,10 +16,17 @@ else
   COMPOSE="docker compose -f infra/docker-compose.yml --env-file .env"
 fi
 
-echo "==> Rebuild migrate image"
+if ! grep -q '"migrate": "node dist/migrate.js"' packages/db/package.json; then
+  echo "ERROR: packages/db/package.json still uses tsx — run: git fetch origin && git reset --hard origin/main"
+  grep '"migrate"' packages/db/package.json || true
+  exit 1
+fi
+
+echo "==> Rebuild migrate image (commit $(git rev-parse --short HEAD))"
 $COMPOSE --profile migrate build --no-cache migrate
 
 echo "==> Apply SQL migrations"
-$COMPOSE --profile migrate run --rm migrate
+# Explicit entrypoint bypasses any stale image CMD (npm run migrate / tsx)
+$COMPOSE --profile migrate run --rm --entrypoint node migrate packages/db/dist/migrate.js
 
 echo "==> Migrations complete"

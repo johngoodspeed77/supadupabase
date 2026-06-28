@@ -27,8 +27,16 @@ for var in "${required[@]}"; do
   fi
 done
 
-echo "==> Pull latest (optional)"
-git pull --ff-only 2>/dev/null || true
+echo "==> Pull latest from origin/main"
+git fetch origin main
+git merge --ff-only origin/main
+
+if ! grep -q '"migrate": "node dist/migrate.js"' packages/db/package.json; then
+  echo "ERROR: repo on VM is too old for migrations (still expects tsx)."
+  echo "Run: cd $ROOT && git fetch origin && git reset --hard origin/main"
+  grep '"migrate"' packages/db/package.json || true
+  exit 1
+fi
 
 echo "==> Build and start core stack"
 $COMPOSE up -d --build postgres auth-service data-api mail-service admin caddy
@@ -36,9 +44,9 @@ $COMPOSE up -d --build postgres auth-service data-api mail-service admin caddy
 echo "==> Wait for Postgres"
 sleep 5
 
-echo "==> Run migrations"
+echo "==> Run migrations (commit $(git rev-parse --short HEAD))"
 $COMPOSE --profile migrate build --no-cache migrate
-$COMPOSE --profile migrate run --rm migrate
+$COMPOSE --profile migrate run --rm --entrypoint node migrate packages/db/dist/migrate.js
 
 if [[ -n "${TUNNEL_TOKEN:-}" ]]; then
   echo "==> Start Cloudflare tunnel"
