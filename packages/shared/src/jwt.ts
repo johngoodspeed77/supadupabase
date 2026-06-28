@@ -53,7 +53,7 @@ export function verifyJwt(token: string, secret: string, issuer?: string): JwtPa
   const expected = signSegment(data, secret);
 
   const sigBuf = base64UrlDecode(signatureB64);
-  const expBuf = Buffer.from(expected, 'utf8');
+  const expBuf = base64UrlDecode(expected);
   if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
     throw new Error('Invalid token signature');
   }

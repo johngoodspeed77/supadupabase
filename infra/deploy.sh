@@ -11,6 +11,9 @@ else
   COMPOSE="docker compose -f infra/docker-compose.yml --env-file .env"
 fi
 
+export DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-0}"
+export COMPOSE_DOCKER_CLI_BUILD="${COMPOSE_DOCKER_CLI_BUILD:-0}"
+
 if [[ ! -f .env ]]; then
   echo "Missing .env — copy .env.example and set secrets first."
   exit 1

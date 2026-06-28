@@ -16,6 +16,10 @@ else
   COMPOSE="docker compose -f infra/docker-compose.yml --env-file .env"
 fi
 
+# ~/.docker owned by root breaks buildx on some VMs — legacy builder works without it
+export DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-0}"
+export COMPOSE_DOCKER_CLI_BUILD="${COMPOSE_DOCKER_CLI_BUILD:-0}"
+
 if ! grep -q '"migrate": "node dist/migrate.js"' packages/db/package.json; then
   echo "ERROR: packages/db/package.json still uses tsx — run: git fetch origin && git reset --hard origin/main"
   grep '"migrate"' packages/db/package.json || true
