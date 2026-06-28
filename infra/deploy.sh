@@ -37,6 +37,7 @@ echo "==> Wait for Postgres"
 sleep 5
 
 echo "==> Run migrations"
+$COMPOSE --profile migrate build --no-cache migrate
 $COMPOSE --profile migrate run --rm migrate
 
 if [[ -n "${TUNNEL_TOKEN:-}" ]]; then

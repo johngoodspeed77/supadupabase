@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "migrate": "npm run migrate -w @supadupabase/db",
+    "migrate": "npm run build -w @supadupabase/db && node packages/db/dist/migrate.js",
     "dev": "node scripts/dev.mjs",
     "dev:auth": "npm run dev -w @supadupabase/auth-service",
     "dev:data": "npm run dev -w @supadupabase/data-api",
