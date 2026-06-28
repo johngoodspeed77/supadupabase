@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SupaDupaBase Admin</title>
-    <link rel="stylesheet" href="/ui/theme.css" />
-    <link rel="stylesheet" href="/ui/components.css" />
-    <link rel="stylesheet" href="/ui/admin-shell.css" />
+    <link rel="stylesheet" href="ui/theme.css" />
+    <link rel="stylesheet" href="ui/components.css" />
+    <link rel="stylesheet" href="ui/admin-shell.css" />
   </head>
   <body class="sdb-shell">
     <header class="sdb-topbar">
@@ -25,6 +25,7 @@
         <a href="#projects" class="sdb-nav__link is-active" data-view="projects">Projects</a>
         <a href="#users" class="sdb-nav__link" data-view="users">Users</a>
         <a href="#keys" class="sdb-nav__link" data-view="keys">API Keys</a>
+        <a href="#emails" class="sdb-nav__link" data-view="emails">Emails</a>
         <a href="#login" class="sdb-nav__link" data-view="login">Login</a>
       </nav>
 
@@ -79,6 +80,22 @@
           </div>
         </section>
 
+        <section id="view-emails" class="sdb-view" hidden>
+          <div class="sdb-main__header">
+            <h1>Emails</h1>
+            <p class="sdb-muted">Test outbound SMTP configuration.</p>
+          </div>
+          <div id="emails-content" class="sdb-card" style="max-width: 520px">
+            <div id="smtp-status" class="sdb-muted">Loading SMTP status…</div>
+            <form id="test-email-form" class="sdb-form-row" style="margin-top: 1.25rem; flex-direction: column; align-items: stretch">
+              <label class="sdb-label" for="test-email-to">Send test email to</label>
+              <input class="sdb-input" id="test-email-to" name="to" type="email" placeholder="you@example.com" required autocomplete="email" />
+              <button class="sdb-btn sdb-btn--primary" type="submit" style="margin-top: 0.75rem">Send test email</button>
+            </form>
+            <div id="test-email-result" class="sdb-alert" style="margin-top: 1rem" hidden></div>
+          </div>
+        </section>
+
         <section id="view-login" class="sdb-view" hidden>
           <div class="sdb-main__header">
             <h1>Sign in</h1>
@@ -102,6 +119,6 @@
       </main>
     </div>
 
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="app.js?v=3"></script>
   </body>
 </html>

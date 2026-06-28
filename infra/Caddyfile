@@ -25,6 +25,10 @@
 		reverse_proxy auth-service:3001
 	}
 
+	handle /admin/mail/* {
+		reverse_proxy mail-service:3004
+	}
+
 	handle_path /admin/* {
 		reverse_proxy admin:3003
 	}

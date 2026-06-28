@@ -3,8 +3,8 @@ import { AppError } from '@supadupabase/shared';
 import { withJwtContext } from '@supadupabase/db';
 import { addDays, calcWeek } from './hours.js';
 import { buildTimesheetEmail } from './email.js';
-import { sendMail, type SmtpConfig } from './smtp.js';
-import type { MailServiceConfig } from './config.js';
+import { sendMail } from './smtp.js';
+import { toSmtpConfig, type MailServiceConfig } from './config.js';
 
 interface UserRow {
   email: string;
@@ -20,20 +20,6 @@ interface EntryRow {
   start_time: string;
   end_time: string;
   notes: string | null;
-}
-
-function smtpConfig(config: MailServiceConfig): SmtpConfig {
-  if (!config.smtpHost || !config.smtpFrom) {
-    throw new AppError(503, 'smtp_not_configured', 'SMTP is not configured');
-  }
-  return {
-    host: config.smtpHost,
-    port: config.smtpPort,
-    user: config.smtpUser,
-    pass: config.smtpPass,
-    from: config.smtpFrom,
-    secure: config.smtpSecure,
-  };
 }
 
 function isValidEmail(email: string): boolean {
@@ -100,7 +86,7 @@ export async function submitTimesheet(
       week,
     );
 
-    await sendMail(smtpConfig(config), settings.boss_email, subject, html, text);
+    await sendMail(toSmtpConfig(config), settings.boss_email, subject, html, text);
 
     const insertRes = await client.query<{ submitted_at: string }>(
       `INSERT INTO public.week_submissions (user_id, week_start, email_sent_to)

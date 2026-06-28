@@ -6,36 +6,44 @@
 
 **SupaDupaBase** is a custom, self-hosted alternative to Supabase for the owner's websites and PWAs. Greenfield Node/TypeScript monorepo with Postgres RLS, inspired by Supabase's security model and client ergonomics.
 
-**Dependency philosophy:** **In-house first** — server runtime dep `pg` only. No Better Auth, Drizzle, Hono, React, or UI frameworks. See [docs/IN_HOUSE.md](./docs/IN_HOUSE.md).
+**Dependency philosophy:** **In-house first** — server runtime dep `pg` only on core services. No Better Auth, Drizzle, Hono, React, or UI frameworks. See [docs/IN_HOUSE.md](./docs/IN_HOUSE.md). *Exception:* `mail-service` uses `web-push` for PWA reminders (owner-approved direction).
 
 **UI:** **Dark mode only** — **Cyan Hexagons** theme (tessellated flat-top honeycomb). See [docs/THEME.md](./docs/THEME.md).
 
 **GitHub:** https://github.com/johngoodspeed77/supadupabase (`main`)
 
-## Save point — v0.1.0-local-mvp (2026-06-27)
+## Save point — v0.2.0-production-alpha (2026-06-28)
 
-**Current stage:** Local dev MVP **complete**. **Deploy-ready** for Proxmox VM — see [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md). Not deployed yet.
+**Current stage:** **Production deployed and publicly reachable.** Alpha quality — active bug-fix backlog. See [SAVEPOINT.md](./SAVEPOINT.md).
 
-See [SAVEPOINT.md](./SAVEPOINT.md) for restore instructions and commit map.
+**Public:** https://supadupabase.whitelynx.co.nz  
+**VM:** `supadupabase@192.168.1.112` · compose at `~/supadupabase`
 
 ### Completed
 
 - [x] Monorepo scaffold (`packages/shared`, `server`, `db`, `ui`, `sdk`)
 - [x] Auth service (email, Google OAuth, refresh, admin routes, API keys)
-- [x] Data API (GET/POST/PATCH/DELETE, RLS on `profiles`)
-- [x] Admin UI (projects, users, API keys — wired to admin API)
-- [x] Sample PWA (signup, refresh, RLS profiles)
+- [x] Data API (GET/POST/PATCH/DELETE, RLS on whitelisted tables)
+- [x] Admin UI (projects, users, API keys, **Emails** test page)
+- [x] Sample PWA + Timesheet schema/migrations (`002`–`005`)
+- [x] **mail-service** — SMTP send, timesheet submit, admin test email, Web Push API (WIP)
+- [x] Proxmox VM + Docker Compose production stack
+- [x] Cloudflare Tunnel → Caddy → services
+- [x] Gmail SMTP documented and configured on VM
 - [x] Local dev: `docker-compose.dev.yml`, `DEV.md`, `npm run dev`
-- [x] Production infra **docs/config**: `docker-compose.yml`, Caddyfile, DEPLOY.md, PROXMOX.md
-- [x] GitHub repository published
 
-### Not started / deferred
+### In progress / deferred
 
-- [ ] Proxmox VM provision → then run `./infra/deploy.sh` ([DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md))
-- [ ] Production Google OAuth + `.env` on VM
+- [ ] **Bug-fix pass** — see [SAVEPOINT.md § Known bugs](./SAVEPOINT.md#known-bugs--tech-debt-fix-next)
+- [ ] Sync VM with `git` (end `scp` drift); apply migrations `003`–`005` in prod
+- [ ] Production Google OAuth credentials in `.env`
+- [ ] Data API: RPC, anon/service key auth on `/rest`
+- [ ] Admin: create projects from UI; expose new tables without code whitelist edits
+- [ ] Auth: verification + password-reset emails
+- [ ] Timesheet PWA on `timesheet.whitelynx.co.nz`
+- [ ] Weekly push reminder cron + VAPID in production
 - [ ] Integration tests (RLS + JWT)
-- [ ] Data API: RPC, anon/service key auth, more tables
-- [ ] First real consumer site (sample PWA is reference only)
+- [ ] License
 
 ## Owner goals
 
@@ -44,6 +52,7 @@ See [SAVEPOINT.md](./SAVEPOINT.md) for restore instructions and commit map.
 - Google login + email/password
 - Remote access via Cloudflare Tunnel (no router port forwarding)
 - Supabase-like DX (`createClient`, `.from('table').select()`)
+- Outbound email from `johngoodspeed77@gmail.com` (Gmail App Password in `.env`)
 - Minimal external dependencies
 
 ## Confirmed decisions
@@ -53,22 +62,17 @@ See [SAVEPOINT.md](./SAVEPOINT.md) for restore instructions and commit map.
 | Product name | **SupaDupaBase** |
 | NPM package | `@supadupabase/sdk` |
 | GitHub | `johngoodspeed77/supadupabase` |
-| Dependencies | In-house first — server: `pg` only |
+| Dependencies | In-house first — server: `pg` only; `web-push` in mail-service |
 | Auth | scrypt + JWT; Google OAuth via `fetch` |
 | Data API | `packages/server` on Node `http` |
 | Migrations | Plain SQL + migration runner |
 | Admin UI | Static HTML + Cyan Hexagons CSS + vanilla JS |
 | SDK | Zero runtime deps; optional `authUrl` for local split ports |
-| VM | New dedicated full VM on Proxmox (not busy shared VM) |
-| VM specs | Ubuntu 24.04, 4 vCPU, 8 GB RAM, 40 GB disk |
+| VM | Ubuntu 24.04 on Proxmox VM106 (`192.168.1.112`) |
 | Public access | Cloudflare Tunnel → Caddy |
 | Database | PostgreSQL 16 + RLS |
 | Production domain | `supadupabase.whitelynx.co.nz` |
-
-## Still open
-
-- First production consumer PWA/site (beyond sample)
-- License
+| SMTP | Gmail (`smtp.gmail.com:587`, App Password) |
 
 ## Repository structure
 
@@ -78,6 +82,7 @@ supadupabase/
     auth-service/
     data-api/
     admin/
+    mail-service/      # SMTP, timesheet email, push, admin mail test
     sample-pwa/
   packages/
     server/, db/, sdk/, shared/, ui/
@@ -85,19 +90,21 @@ supadupabase/
     IN_HOUSE.md, THEME.md
   infra/
     docker-compose.yml, docker-compose.dev.yml
-    Caddyfile, DEPLOY.md, PROXMOX.md, cloudflared/
+    Caddyfile, DEPLOY.md, DEPLOY_AT_HOME.md, PROXMOX.md
   SAVEPOINT.md
 ```
 
 ## Next work (recommended order)
 
-1. Provision Proxmox VM ([infra/PROXMOX.md](./infra/PROXMOX.md))
-2. Deploy stack ([infra/DEPLOY.md](./infra/DEPLOY.md)) + tunnel token
-3. Google OAuth production credentials
-4. Create anon/service keys via admin; wire first real site
-5. RLS integration tests
+1. **Bug-fix pass** — work through [SAVEPOINT.md](./SAVEPOINT.md) known bugs list
+2. `git pull` on VM + full rebuild + `migrate` profile
+3. Verify Emails test send end-to-end in admin
+4. Google OAuth production credentials
+5. Wire Timesheet PWA to production API
+6. anon/service key auth on data API
+7. RLS integration tests
 
-## Auth service contract (MVP)
+## Auth service contract
 
 | Method | Path | Purpose |
 |--------|------|---------|
@@ -113,18 +120,34 @@ supadupabase/
 | GET | `/admin/users` | List users (admin) |
 | GET | `/admin/api-keys` | List keys (admin) |
 
-Admin routes require `ADMIN_EMAILS` in `.env`.
+Admin routes require bearer JWT + email in `ADMIN_EMAILS`.
 
-## Data API contract (MVP)
+## Mail service contract
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| GET/POST/PATCH/DELETE | `/rest/v1/:table` | CRUD (`profiles` whitelisted) |
+| GET | `/mail/healthz` | Health |
+| GET | `/admin/mail/status` | SMTP configured? (admin) |
+| POST | `/admin/mail/test` | Send test email `{ to }` (admin) |
+| POST | `/mail/timesheet/submit` | Email weekly timesheet to boss |
+| GET | `/mail/push/vapid-public-key` | VAPID public key |
+| POST | `/mail/push/subscribe` | Save push subscription |
+| POST | `/mail/push/unsubscribe` | Remove subscription |
+
+Caddy routes `/admin/mail/*` → mail-service. `ADMIN_EMAILS` must be set on mail-service container.
+
+## Data API contract
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET/POST/PATCH/DELETE | `/rest/v1/:table` | CRUD (whitelisted tables, JWT only) |
 | POST | `/rest/v1/rpc/:function` | Not implemented (501) |
+
+**Whitelisted tables:** `profiles`, `user_settings`, `time_entries`, `week_submissions` (see `apps/data-api/src/config.ts`).
 
 ## Security rules (non-negotiable)
 
-- Never commit `.env`, tunnel tokens, Google secrets
+- Never commit `.env`, tunnel tokens, Google secrets, SMTP passwords, VAPID private keys
 - Never expose `service_role` keys to browsers
 - Parameterized queries only in data API
 - No third-party auth/ORM/UI frameworks without owner approval
@@ -136,6 +159,7 @@ Admin routes require `ADMIN_EMAILS` in `.env`.
 - Minimize scope
 - Commits/pushes only when the user asks
 - Update this handoff + SAVEPOINT.md on major milestones
+- Production runs **only on the VM**; dev PC is for code + `npm run dev`
 
 ## Related docs
 
@@ -143,9 +167,10 @@ Admin routes require `ADMIN_EMAILS` in `.env`.
 - [SAVEPOINT.md](./SAVEPOINT.md)
 - [AGENTS.md](./AGENTS.md)
 - [DEV.md](./DEV.md)
+- [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md)
 - [docs/IN_HOUSE.md](./docs/IN_HOUSE.md)
 - [docs/THEME.md](./docs/THEME.md)
 
 ## Last updated
 
-2026-06-27 — Save point v0.1.0-local-mvp; README/handoff synced; pushed to GitHub.
+2026-06-28 — Save point v0.2.0-production-alpha; production live; Emails admin + mail-service; bug backlog documented.

@@ -19,6 +19,10 @@ const els = {
   keysContent: document.getElementById('keys-content'),
   createKeyForm: document.getElementById('create-key-form'),
   newKeyResult: document.getElementById('new-key-result'),
+  emailsContent: document.getElementById('emails-content'),
+  smtpStatus: document.getElementById('smtp-status'),
+  testEmailForm: document.getElementById('test-email-form'),
+  testEmailResult: document.getElementById('test-email-result'),
 };
 
 function authHeaders() {
@@ -29,9 +33,32 @@ function authHeaders() {
   };
 }
 
-async function adminFetch(path) {
-  const res = await fetch(`${AUTH_URL}${path}`, { headers: authHeaders() });
+async function refreshSession() {
+  if (!state.refreshToken) return false;
+  const res = await fetch(`${AUTH_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: state.refreshToken }),
+  });
+  if (!res.ok) return false;
   const body = await res.json();
+  setSession(body);
+  return true;
+}
+
+async function adminFetch(path, options = {}) {
+  const doFetch = () =>
+    fetch(`${AUTH_URL}${path}`, {
+      ...options,
+      headers: { ...authHeaders(), ...options.headers },
+    });
+
+  let res = await doFetch();
+  let body = await res.json();
+  if (res.status === 401 && (await refreshSession())) {
+    res = await doFetch();
+    body = await res.json();
+  }
   if (!res.ok) throw new Error(body.message ?? 'Request failed');
   return body;
 }
@@ -46,6 +73,7 @@ function showView(name) {
   if (name === 'projects') renderProjects();
   if (name === 'users') renderUsers();
   if (name === 'keys') renderKeys();
+  if (name === 'emails') renderEmails();
 }
 
 function setSession(session) {
@@ -77,10 +105,23 @@ function updateUserUi() {
 }
 
 async function fetchMe() {
-  if (!state.accessToken) return;
-  const res = await fetch(`${AUTH_URL}/auth/me`, {
+  if (!state.accessToken && !state.refreshToken) return;
+  if (!state.accessToken && state.refreshToken) {
+    const ok = await refreshSession();
+    if (!ok) {
+      clearSession();
+      return;
+    }
+  }
+
+  let res = await fetch(`${AUTH_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${state.accessToken}` },
   });
+  if (res.status === 401 && (await refreshSession())) {
+    res = await fetch(`${AUTH_URL}/auth/me`, {
+      headers: { Authorization: `Bearer ${state.accessToken}` },
+    });
+  }
   if (!res.ok) {
     clearSession();
     return;
@@ -213,6 +254,67 @@ async function renderKeys() {
   }
 }
 
+async function renderEmails() {
+  els.testEmailResult.hidden = true;
+  if (!state.accessToken) {
+    els.smtpStatus.innerHTML = '<p class="sdb-muted">Sign in to test email.</p>';
+    els.testEmailForm.querySelector('button').disabled = true;
+    return;
+  }
+  els.testEmailForm.querySelector('button').disabled = false;
+  try {
+    const status = await adminFetch('/admin/mail/status');
+    if (status.configured) {
+      els.smtpStatus.innerHTML = `
+        <p><span class="sdb-badge">configured</span></p>
+        <p class="sdb-muted" style="margin-top: 0.5rem">
+          From <code>${status.smtp_from}</code> via <code>${status.smtp_host}:${status.smtp_port}</code>
+        </p>`;
+    } else {
+      els.smtpStatus.innerHTML = `
+        <p><span class="sdb-badge" style="opacity:0.7">not configured</span></p>
+        <p class="sdb-dim" style="margin-top: 0.5rem">
+          Set SMTP_HOST, SMTP_USER, SMTP_PASS, and SMTP_FROM in the server <code>.env</code>, then restart mail-service.
+        </p>`;
+      els.testEmailForm.querySelector('button').disabled = true;
+    }
+  } catch (err) {
+    const msg =
+      err.message === 'Invalid or expired access token'
+        ? 'Your admin session expired. Use Logout, then sign in again. (This is not your Google app password.)'
+        : err.message;
+    els.smtpStatus.innerHTML = `<p class="sdb-dim">${msg}</p>`;
+    els.testEmailForm.querySelector('button').disabled = true;
+  }
+}
+
+if (els.testEmailForm) {
+  els.testEmailForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    els.testEmailResult.hidden = true;
+    const to = document.getElementById('test-email-to').value;
+    const btn = els.testEmailForm.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      const body = await adminFetch('/admin/mail/test', {
+        method: 'POST',
+        body: JSON.stringify({ to }),
+      });
+      els.testEmailResult.textContent = `Test email sent to ${body.sent_to}. Check the inbox (and spam folder).`;
+      els.testEmailResult.className = 'sdb-alert sdb-alert--success';
+      els.testEmailResult.hidden = false;
+    } catch (err) {
+      els.testEmailResult.textContent = err.message;
+      els.testEmailResult.className = 'sdb-alert sdb-alert--error';
+      els.testEmailResult.hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send test email';
+    }
+  });
+}
+
 if (els.createKeyForm) {
   els.createKeyForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -242,8 +344,7 @@ if (els.createKeyForm) {
 }
 
 const hash = window.location.hash.replace('#', '') || 'projects';
-showView(['projects', 'users', 'keys', 'login'].includes(hash) ? hash : 'projects');
-fetchMe();
+const initialView = ['projects', 'users', 'keys', 'emails', 'login'].includes(hash) ? hash : 'projects';
 
 const params = new URLSearchParams(window.location.search);
 if (params.get('access_token')) {
@@ -253,5 +354,12 @@ if (params.get('access_token')) {
     user: null,
   });
   window.history.replaceState({}, '', window.location.pathname + window.location.hash);
-  fetchMe().then(() => showView('projects'));
 }
+
+fetchMe().then(() => {
+  if (initialView !== 'login' && !state.accessToken) {
+    showView('login');
+    return;
+  }
+  showView(initialView);
+});

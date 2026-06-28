@@ -1,3 +1,6 @@
+import { AppError } from '@supadupabase/shared';
+import type { SmtpConfig } from './smtp.js';
+
 export interface MailServiceConfig {
   port: number;
   databaseUrl: string;
@@ -30,6 +33,20 @@ export function loadConfig(): MailServiceConfig {
     smtpPass: process.env.SMTP_PASS ?? '',
     smtpFrom: process.env.SMTP_FROM ?? '',
     smtpSecure: process.env.SMTP_SECURE === 'true',
+  };
+}
+
+export function toSmtpConfig(config: MailServiceConfig): SmtpConfig {
+  if (!config.smtpHost || !config.smtpFrom) {
+    throw new AppError(503, 'smtp_not_configured', 'SMTP is not configured');
+  }
+  return {
+    host: config.smtpHost,
+    port: config.smtpPort,
+    user: config.smtpUser,
+    pass: config.smtpPass,
+    from: config.smtpFrom,
+    secure: config.smtpSecure,
   };
 }
 

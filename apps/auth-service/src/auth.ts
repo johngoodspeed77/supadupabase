@@ -74,12 +74,24 @@ export async function signup(
   }
 
   const passwordHash = hashPassword(password);
-  const result = await pool.query<DbUser>(
-    `INSERT INTO auth.users (email, password_hash, email_verified)
-     VALUES ($1, $2, false)
-     RETURNING id, email, password_hash, created_at`,
-    [email.toLowerCase(), passwordHash],
-  );
+  let result;
+  try {
+    result = await pool.query<DbUser>(
+      `INSERT INTO auth.users (email, password_hash, email_verified)
+       VALUES ($1, $2, false)
+       RETURNING id, email, password_hash, created_at`,
+      [email.toLowerCase(), passwordHash],
+    );
+  } catch (err) {
+    if ((err as { code?: string }).code === '23505') {
+      throw new AppError(
+        409,
+        'email_exists',
+        'An account with this email already exists. Sign in instead.',
+      );
+    }
+    throw err;
+  }
 
   const user = result.rows[0];
   await pool.query(

@@ -26,9 +26,10 @@
   --sdb-font: system-ui, "Segoe UI", Roboto, sans-serif;
   --sdb-font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
 
-  /* Tessellated honeycomb tile (flat-top, r=14) */
-  --sdb-hex-tile-w: 42px;
-  --sdb-hex-tile-h: 25px;
+  /* Flat-top honeycomb tile, R=18 — must match hex-tile.svg viewBox exactly */
+  --sdb-hex-r: 18px;
+  --sdb-hex-tile-w: 54px;
+  --sdb-hex-tile-h: 31.177px;
 }
 
 *,
@@ -52,14 +53,31 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Tessellated flat-top honeycomb (see docs/THEME.md) */
+/* Full-page hex wallpaper (packages/ui/hex-background.png) */
 .sdb-shell {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   background-color: var(--sdb-bg-deep);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='25' viewBox='0 0 42 25'%3E%3Cg fill='none' stroke='%2322d3ee' stroke-opacity='0.08' stroke-width='0.75' vector-effect='non-scaling-stroke'%3E%3Cpolygon points='28,12.124 21,24.248 7,24.248 0,12.124 7,0 21,0'/%3E%3Cpolygon points='49,12.124 42,24.248 28,24.248 21,12.124 28,0 42,0'/%3E%3Cpolygon points='17.5,24.248 10.5,36.372 -3.5,36.372 -10.5,24.248 -3.5,12.124 10.5,12.124'/%3E%3Cpolygon points='38.5,24.248 31.5,36.372 17.5,36.372 10.5,24.248 17.5,12.124 31.5,12.124'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: var(--sdb-hex-tile-w) var(--sdb-hex-tile-h);
-  background-repeat: repeat;
-  background-position: 0 0;
+}
+
+.sdb-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-color: var(--sdb-bg-deep);
+  background-image: url("hex-background.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdb-shell::before {
+    background-attachment: scroll;
+  }
 }
 
 a {

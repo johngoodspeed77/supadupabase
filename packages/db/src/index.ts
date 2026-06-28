@@ -1,5 +1,9 @@
 import pg from 'pg';
 
+// Return DATE/TIME columns as plain strings — avoids JSON Date timezone shifts in clients.
+pg.types.setTypeParser(1082, (val) => val); // DATE
+pg.types.setTypeParser(1083, (val) => val); // TIME
+
 export function createPool(connectionString?: string): pg.Pool {
   const url = connectionString ?? process.env.DATABASE_URL;
   if (!url) {

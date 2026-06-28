@@ -13,6 +13,8 @@ const mime: Record<string, string> = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
 };
 
 async function resolveFile(pathname: string): Promise<{ filePath: string; contentType: string } | null> {
@@ -51,6 +53,9 @@ const server = createServer(async (req, res) => {
     const content = await readFile(resolved.filePath);
     res.statusCode = 200;
     res.setHeader('Content-Type', resolved.contentType);
+    if (resolved.contentType.includes('html') || resolved.contentType.includes('javascript')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
     res.end(content);
   } catch (err) {
     console.error(err);

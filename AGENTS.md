@@ -20,4 +20,5 @@ Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first.
 | `packages/sdk` | `@supadupabase/sdk` |
 | `apps/auth-service` | Auth + Google OAuth |
 | `apps/data-api` | REST + RLS |
+| `apps/mail-service` | SMTP, timesheet email, push, admin mail test |
 | `apps/admin` | Static admin UI |
