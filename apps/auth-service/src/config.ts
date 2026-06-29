@@ -8,6 +8,7 @@ export interface Config {
   googleClientSecret: string;
   mailServiceUrl: string;
   timesheetPublicUrl: string;
+  inviteOnly: boolean;
 }
 
 export function loadConfig(): Config {
@@ -32,5 +33,6 @@ export function loadConfig(): Config {
       /\/$/,
       '',
     ),
+    inviteOnly: process.env.INVITE_ONLY === '1' || process.env.INVITE_ONLY === 'true',
   };
 }

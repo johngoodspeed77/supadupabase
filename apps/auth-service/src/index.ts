@@ -53,6 +53,10 @@ router.get('/auth/healthz', (_ctx) => {
 });
 
 router.post('/auth/signup', async (ctx) => {
+  if (config.inviteOnly) {
+    errorResponse(ctx, 403, 'New sign-ups are disabled. Ask your admin for an invite.', 'signup_disabled');
+    return;
+  }
   const body = ctx.body as { email?: string; password?: string } | null;
   const session = await signup(pool, config, body?.email ?? '', body?.password ?? '');
   jsonResponse(ctx, 201, session);
@@ -88,6 +92,10 @@ router.get('/auth/me', async (ctx) => {
 });
 
 router.get('/auth/signin/google', async (ctx) => {
+  if (config.inviteOnly) {
+    errorResponse(ctx, 403, 'Google sign-in is disabled for new users. Use your invited account.', 'signup_disabled');
+    return;
+  }
   if (!config.googleClientId) {
     errorResponse(ctx, 503, 'Google OAuth is not configured', 'oauth_not_configured');
     return;

@@ -281,6 +281,9 @@ export async function handleGoogleCallback(
       [info.sub, user.id],
     );
   } else {
+    if (config.inviteOnly) {
+      throw new AppError(403, 'signup_disabled', 'No account for this Google user. Ask your admin for an invite.');
+    }
     const inserted = await pool.query<DbUser>(
       `INSERT INTO auth.users (email, google_id, email_verified)
        VALUES ($1, $2, true)
