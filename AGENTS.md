@@ -13,6 +13,7 @@ Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first.
 
 | Path | Role |
 |------|------|
+| `docs/STACK.md` | Option B architecture + one-Cursor workflow |
 | `packages/server` | In-house HTTP router |
 | `packages/shared` | JWT, scrypt, types |
 | `packages/db` | SQL migrations |

@@ -17,7 +17,9 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 | Timesheet schema + SMTP (Gmail) | Timesheet PWA on production |
 | Admin **Emails** page (test SMTP) | Google OAuth in prod, push reminder cron |
 
-Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) · Architecture: [AGENT_HANDOFF.md](./AGENT_HANDOFF.md)
+Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) · Architecture: [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) · Stack: [docs/STACK.md](./docs/STACK.md)
+
+**Cursor workspace:** `E:\White Lynx Projects\Cursor\whitelynx.code-workspace`
 
 ## Production URLs
 

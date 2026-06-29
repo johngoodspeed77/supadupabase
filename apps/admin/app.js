@@ -1,8 +1,17 @@
+import {
+  loadTokens,
+  saveTokens,
+  clearTokens,
+  refreshAuthSession,
+  restoreAuthSession,
+} from '/ui/session.js';
+
 const AUTH_URL = (window.__SDB_AUTH_URL ?? window.location.origin).replace(/\/$/, '');
 
+const initialTokens = loadTokens();
 const state = {
-  accessToken: sessionStorage.getItem('sdb_access_token'),
-  refreshToken: sessionStorage.getItem('sdb_refresh_token'),
+  accessToken: initialTokens.accessToken,
+  refreshToken: initialTokens.refreshToken,
   user: null,
 };
 
@@ -34,15 +43,9 @@ function authHeaders() {
 }
 
 async function refreshSession() {
-  if (!state.refreshToken) return false;
-  const res = await fetch(`${AUTH_URL}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: state.refreshToken }),
-  });
-  if (!res.ok) return false;
-  const body = await res.json();
-  setSession(body);
+  const session = await refreshAuthSession(AUTH_URL, state.refreshToken);
+  if (!session) return false;
+  setSession(session);
   return true;
 }
 
@@ -79,9 +82,8 @@ function showView(name) {
 function setSession(session) {
   state.accessToken = session.access_token;
   state.refreshToken = session.refresh_token;
-  state.user = session.user;
-  sessionStorage.setItem('sdb_access_token', session.access_token);
-  sessionStorage.setItem('sdb_refresh_token', session.refresh_token);
+  state.user = session.user ?? state.user;
+  saveTokens(session.access_token, session.refresh_token);
   updateUserUi();
 }
 
@@ -89,8 +91,7 @@ function clearSession() {
   state.accessToken = null;
   state.refreshToken = null;
   state.user = null;
-  sessionStorage.removeItem('sdb_access_token');
-  sessionStorage.removeItem('sdb_refresh_token');
+  clearTokens();
   updateUserUi();
 }
 
@@ -105,29 +106,14 @@ function updateUserUi() {
 }
 
 async function fetchMe() {
-  if (!state.accessToken && !state.refreshToken) return;
-  if (!state.accessToken && state.refreshToken) {
-    const ok = await refreshSession();
-    if (!ok) {
-      clearSession();
-      return;
-    }
-  }
-
-  let res = await fetch(`${AUTH_URL}/auth/me`, {
-    headers: { Authorization: `Bearer ${state.accessToken}` },
-  });
-  if (res.status === 401 && (await refreshSession())) {
-    res = await fetch(`${AUTH_URL}/auth/me`, {
-      headers: { Authorization: `Bearer ${state.accessToken}` },
-    });
-  }
-  if (!res.ok) {
+  const restored = await restoreAuthSession(AUTH_URL);
+  if (!restored) {
     clearSession();
     return;
   }
-  const body = await res.json();
-  state.user = body.user;
+  state.accessToken = restored.accessToken;
+  state.refreshToken = restored.refreshToken;
+  state.user = restored.user;
   updateUserUi();
 }
 

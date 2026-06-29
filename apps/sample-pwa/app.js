@@ -1,12 +1,20 @@
 import { createClient } from '/sdk/index.js';
+import {
+  loadTokens,
+  saveTokens,
+  clearTokens,
+  restoreAuthSession,
+  refreshAuthSession,
+} from '/ui/session.js';
 
 const AUTH_URL = (window.__SDB_AUTH_URL ?? 'http://localhost:3001').replace(/\/$/, '');
 const DATA_URL = (window.__SDB_DATA_URL ?? 'http://localhost:3002').replace(/\/$/, '');
 
+const tokens = loadTokens();
 const client = createClient({
   url: DATA_URL,
   authUrl: AUTH_URL,
-  accessToken: sessionStorage.getItem('sdb_access_token') ?? undefined,
+  accessToken: tokens.accessToken ?? undefined,
 });
 
 const els = {
@@ -24,25 +32,31 @@ function showError(msg) {
 }
 
 function persistSession(session) {
-  sessionStorage.setItem('sdb_access_token', session.access_token);
-  sessionStorage.setItem('sdb_refresh_token', session.refresh_token);
+  saveTokens(session.access_token, session.refresh_token);
   client.setAccessToken(session.access_token);
 }
 
 function clearSession() {
-  sessionStorage.removeItem('sdb_access_token');
-  sessionStorage.removeItem('sdb_refresh_token');
+  clearTokens();
   client.setAccessToken(null);
 }
 
 async function loadProfile() {
-  const { data: me } = await fetch(`${AUTH_URL}/auth/me`, {
-    headers: { Authorization: `Bearer ${client.getAccessToken()}` },
-  }).then((r) => r.json()).then((user) => ({ data: user }));
+  const token = client.getAccessToken();
+  if (!token) return;
 
-  if (me?.user) {
-    els.status.textContent = me.user.email;
+  const meRes = await fetch(`${AUTH_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+  });
+  const me = await meRes.json();
+  if (!meRes.ok) {
+    clearSession();
+    els.authPanel.hidden = false;
+    els.profilePanel.hidden = true;
+    return;
   }
+
+  els.status.textContent = me.user.email;
 
   const { data, error } = await client.from('profiles').select('*');
   if (error) {
@@ -57,12 +71,15 @@ async function loadProfile() {
 }
 
 async function ensureAuthed() {
-  if (!client.getAccessToken()) return;
-  const res = await fetch(`${AUTH_URL}/auth/me`, {
-    headers: { Authorization: `Bearer ${client.getAccessToken()}` },
-  });
-  if (res.ok) await loadProfile();
-  else clearSession();
+  const restored = await restoreAuthSession(AUTH_URL);
+  if (!restored) {
+    clearSession();
+    els.authPanel.hidden = false;
+    els.profilePanel.hidden = true;
+    return;
+  }
+  client.setAccessToken(restored.accessToken);
+  await loadProfile();
 }
 
 document.getElementById('signup-form').addEventListener('submit', async (e) => {
@@ -111,17 +128,18 @@ document.getElementById('save-profile').addEventListener('click', async () => {
 });
 
 document.getElementById('refresh-session').addEventListener('click', async () => {
-  const rt = sessionStorage.getItem('sdb_refresh_token');
-  if (!rt) return showError('No refresh token');
-  const { data, error } = await client.auth.refreshSession(rt);
-  if (error) return showError(error.message);
-  persistSession(data);
+  const { refreshToken } = loadTokens();
+  if (!refreshToken) return showError('No refresh token');
+  const session = await refreshAuthSession(AUTH_URL, refreshToken);
+  if (!session) return showError('Refresh failed');
+  persistSession(session);
   showError('');
   els.status.textContent = 'Session refreshed';
 });
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  await client.auth.signOut(sessionStorage.getItem('sdb_refresh_token') ?? undefined);
+  const { refreshToken } = loadTokens();
+  await client.auth.signOut(refreshToken ?? undefined);
   clearSession();
   els.authPanel.hidden = false;
   els.profilePanel.hidden = true;

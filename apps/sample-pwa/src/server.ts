@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
 const sdkDir = join(rootDir, '..', '..', 'packages', 'sdk', 'dist');
+const uiDir = join(rootDir, '..', '..', 'packages', 'ui');
 const port = Number(process.env.SAMPLE_PORT ?? 5173);
 
 const mime: Record<string, string> = {
@@ -32,6 +33,12 @@ async function resolveFile(pathname: string): Promise<{ filePath: string; conten
   if (pathname.startsWith('/sdk/')) {
     const rel = pathname.slice(5);
     const filePath = join(sdkDir, rel);
+    const ext = extname(filePath);
+    return { filePath, contentType: mime[ext] ?? 'text/javascript; charset=utf-8' };
+  }
+  if (pathname.startsWith('/ui/')) {
+    const rel = pathname.slice(4);
+    const filePath = join(uiDir, rel);
     const ext = extname(filePath);
     return { filePath, contentType: mime[ext] ?? 'text/javascript; charset=utf-8' };
   }

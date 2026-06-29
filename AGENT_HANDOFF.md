@@ -17,7 +17,10 @@
 **Current stage:** **Production deployed and publicly reachable.** Alpha quality — active bug-fix backlog. See [SAVEPOINT.md](./SAVEPOINT.md).
 
 **Public:** https://supadupabase.whitelynx.co.nz  
-**VM:** `supadupabase@192.168.1.112` · compose at `~/supadupabase`
+**VM:** `supadupabase@192.168.1.112` · compose at `~/supadupabase`  
+**Timesheet (consumer):** https://timesheet.whitelynx.co.nz on VM101 — see [docs/STACK.md](./docs/STACK.md)
+
+**One Cursor workspace:** `E:\White Lynx Projects\Cursor\whitelynx.code-workspace` (SupaDupaBase + Timesheet App)
 
 ### Completed
 
@@ -40,7 +43,7 @@
 - [ ] Data API: RPC, anon/service key auth on `/rest`
 - [ ] Admin: create projects from UI; expose new tables without code whitelist edits
 - [ ] Auth: verification + password-reset emails
-- [ ] Timesheet PWA on `timesheet.whitelynx.co.nz`
+- [ ] Timesheet PWA on `timesheet.whitelynx.co.nz` (VM101) — Option B; redeploy with `SDB_PUBLIC_URL`
 - [ ] Weekly push reminder cron + VAPID in production
 - [ ] Integration tests (RLS + JWT)
 - [ ] License
@@ -168,6 +171,7 @@ Caddy routes `/admin/mail/*` → mail-service. `ADMIN_EMAILS` must be set on mai
 - [AGENTS.md](./AGENTS.md)
 - [DEV.md](./DEV.md)
 - [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md)
+- [docs/STACK.md](./docs/STACK.md)
 - [docs/IN_HOUSE.md](./docs/IN_HOUSE.md)
 - [docs/THEME.md](./docs/THEME.md)
 
