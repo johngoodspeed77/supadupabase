@@ -46,19 +46,6 @@ export async function listProjects(pool: pg.Pool) {
   return result.rows;
 }
 
-export async function listUsers(pool: pg.Pool) {
-  const result = await pool.query<{
-    id: string;
-    email: string;
-    email_verified: boolean;
-    google_id: string | null;
-    created_at: string;
-  }>(
-    `SELECT id, email, email_verified, google_id, created_at FROM auth.users ORDER BY created_at DESC LIMIT 500`,
-  );
-  return result.rows;
-}
-
 export async function listApiKeys(pool: pg.Pool) {
   const result = await pool.query<{
     id: string;

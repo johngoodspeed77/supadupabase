@@ -6,7 +6,7 @@ import {
   errorResponse,
 } from '@supadupabase/server';
 import { createPool } from '@supadupabase/db';
-import { isAppError } from '@supadupabase/shared';
+import { isAppError, AppError } from '@supadupabase/shared';
 import { loadConfig } from './config.js';
 import {
   signup,
@@ -24,10 +24,21 @@ import {
 import {
   requireAdmin,
   listProjects,
-  listUsers,
   listApiKeys,
   createApiKey,
 } from './admin.js';
+
+import {
+  listUsers,
+  getUserDetail,
+  updateUser,
+  deleteUser,
+  listInvites,
+  createInvite,
+  revokeInvite,
+  previewInvite,
+  acceptInvite,
+} from './admin-users.js';
 
 const config = loadConfig();
 const pool = createPool(config.databaseUrl);
@@ -146,6 +157,115 @@ router.get('/admin/users', async (ctx) => {
     await requireAdmin(pool, config, ctx.headers);
     const users = await listUsers(pool);
     jsonResponse(ctx, 200, { users });
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.post('/admin/users/invite', async (ctx) => {
+  try {
+    const admin = await requireAdmin(pool, config, ctx.headers);
+    const body = ctx.body as { email?: string; project_id?: string } | null;
+    const auth = ctx.headers.authorization ?? ctx.headers.Authorization;
+    const authHeader = Array.isArray(auth) ? auth[0] : auth ?? '';
+    const result = await createInvite(
+      pool,
+      config,
+      body?.email ?? '',
+      body?.project_id ?? null,
+      admin.id,
+      authHeader,
+    );
+    jsonResponse(ctx, 201, result);
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.get('/admin/users/:id', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const detail = await getUserDetail(pool, ctx.params.id);
+    jsonResponse(ctx, 200, detail);
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.patch('/admin/users/:id', async (ctx) => {
+  try {
+    const admin = await requireAdmin(pool, config, ctx.headers);
+    const body = ctx.body as {
+      email_verified?: boolean;
+      suspended?: boolean;
+      banned_reason?: string | null;
+    } | null;
+    if (body?.suspended === true && ctx.params.id === admin.id) {
+      throw new AppError(400, 'cannot_suspend_self', 'You cannot suspend your own admin account');
+    }
+    const detail = await updateUser(pool, ctx.params.id, {
+      email_verified: body?.email_verified,
+      suspended: body?.suspended,
+      banned_reason: body?.banned_reason,
+    });
+    jsonResponse(ctx, 200, detail);
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.delete('/admin/users/:id', async (ctx) => {
+  try {
+    const admin = await requireAdmin(pool, config, ctx.headers);
+    const result = await deleteUser(pool, ctx.params.id, admin.id);
+    jsonResponse(ctx, 200, result);
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.get('/admin/invites', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const invites = await listInvites(pool);
+    jsonResponse(ctx, 200, { invites });
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.delete('/admin/invites/:id', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const result = await revokeInvite(pool, ctx.params.id);
+    jsonResponse(ctx, 200, result);
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.get('/auth/invite/:token', async (ctx) => {
+  try {
+    const preview = await previewInvite(pool, ctx.params.token);
+    jsonResponse(ctx, 200, preview);
+  } catch (err) {
+    if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
+    else throw err;
+  }
+});
+
+router.post('/auth/invite/accept', async (ctx) => {
+  try {
+    const body = ctx.body as { token?: string; password?: string } | null;
+    const session = await acceptInvite(pool, config, body?.token ?? '', body?.password ?? '');
+    jsonResponse(ctx, 201, session);
   } catch (err) {
     if (isAppError(err)) errorResponse(ctx, err.status, err.message, err.code);
     else throw err;

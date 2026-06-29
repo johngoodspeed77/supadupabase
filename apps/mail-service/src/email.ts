@@ -106,3 +106,27 @@ export function buildTestEmail(): { subject: string; html: string; text: string 
   ].join('\n');
   return { subject, html, text };
 }
+
+export function buildInviteEmail(inviteUrl: string): { subject: string; html: string; text: string } {
+  const subject = 'You are invited to Timesheet App';
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${esc(subject)}</title></head>
+<body style="font-family:system-ui,sans-serif;color:#111;">
+  <h1>Timesheet App</h1>
+  <p>You have been invited to create an account on Timesheet App (SupaDupaBase).</p>
+  <p><a href="${esc(inviteUrl)}" style="display:inline-block;padding:12px 20px;background:#06b6d4;color:#000;text-decoration:none;border-radius:8px;font-weight:600;">Accept invite &amp; set password</a></p>
+  <p style="color:#64748b;font-size:12px;">This link expires in 7 days. If you did not expect this email, you can ignore it.</p>
+  <p style="color:#64748b;font-size:12px;word-break:break-all;">${esc(inviteUrl)}</p>
+</body>
+</html>`;
+  const text = [
+    'Timesheet App',
+    '',
+    'You have been invited to create an account.',
+    '',
+    `Open this link to accept and set your password (expires in 7 days):`,
+    inviteUrl,
+  ].join('\n');
+  return { subject, html, text };
+}

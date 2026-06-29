@@ -11,6 +11,7 @@ import { loadConfig, extractBearer } from './config.js';
 import { requireAdmin } from './admin.js';
 import { submitTimesheet } from './submit.js';
 import { sendTestEmail, smtpStatus } from './test.js';
+import { sendInviteEmail } from './invite.js';
 import {
   vapidPublicKey,
   savePushSubscription,
@@ -56,6 +57,22 @@ router.post('/admin/mail/test', async (ctx) => {
     } else {
       console.error(err);
       errorResponse(ctx, 500, 'Failed to send test email', 'send_failed');
+    }
+  }
+});
+
+router.post('/admin/mail/invite', async (ctx) => {
+  try {
+    await requireAdmin(pool, config, ctx.headers);
+    const body = ctx.body as { to?: string; invite_url?: string } | null;
+    const result = await sendInviteEmail(config, body?.to ?? '', body?.invite_url ?? '');
+    jsonResponse(ctx, 200, result);
+  } catch (err) {
+    if (isAppError(err)) {
+      errorResponse(ctx, err.status, err.message, err.code);
+    } else {
+      console.error(err);
+      errorResponse(ctx, 500, 'Failed to send invite email', 'send_failed');
     }
   }
 });

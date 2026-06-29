@@ -92,3 +92,87 @@
     white-space: nowrap;
   }
 }
+
+.sdb-btn--sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.sdb-badge--success {
+  color: var(--sdb-success);
+  border-color: var(--sdb-success);
+}
+
+.sdb-badge--warning {
+  color: var(--sdb-warning);
+  border-color: var(--sdb-warning);
+}
+
+.sdb-badge--danger {
+  color: var(--sdb-error);
+  border-color: var(--sdb-error);
+}
+
+.sdb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.sdb-dialog {
+  width: min(720px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--sdb-border);
+  border-radius: var(--sdb-radius);
+  background: var(--sdb-bg-raised);
+  color: var(--sdb-text);
+}
+
+.sdb-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.sdb-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--sdb-border);
+}
+
+.sdb-dialog__header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.sdb-dialog__body {
+  padding: 1.25rem;
+  overflow: auto;
+  max-height: calc(100vh - 8rem);
+}
+
+.sdb-kv {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0.5rem 1rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.sdb-kv dt {
+  color: var(--sdb-text-muted);
+}
+
+.sdb-kv dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.sdb-section-title {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.9375rem;
+  color: var(--sdb-cyan-300);
+}

@@ -6,6 +6,8 @@ export interface Config {
   publicUrl: string;
   googleClientId: string;
   googleClientSecret: string;
+  mailServiceUrl: string;
+  timesheetPublicUrl: string;
 }
 
 export function loadConfig(): Config {
@@ -25,5 +27,10 @@ export function loadConfig(): Config {
     publicUrl: publicUrl.replace(/\/$/, ''),
     googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+    mailServiceUrl: (process.env.MAIL_SERVICE_URL ?? 'http://mail-service:3004').replace(/\/$/, ''),
+    timesheetPublicUrl: (process.env.TIMESHEET_PUBLIC_URL ?? 'https://timesheet.whitelynx.co.nz').replace(
+      /\/$/,
+      '',
+    ),
   };
 }

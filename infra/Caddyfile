@@ -17,7 +17,11 @@
 		reverse_proxy auth-service:3001
 	}
 
-	handle /admin/users {
+	handle /admin/users* {
+		reverse_proxy auth-service:3001
+	}
+
+	handle /admin/invites* {
 		reverse_proxy auth-service:3001
 	}
 

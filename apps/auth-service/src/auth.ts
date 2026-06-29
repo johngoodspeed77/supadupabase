@@ -21,6 +21,8 @@ interface DbUser {
   created_at: string;
 }
 
+export type { DbUser };
+
 function refreshExpiry(): Date {
   const d = new Date();
   d.setDate(d.getDate() + REFRESH_TTL_DAYS);
@@ -35,7 +37,7 @@ function toAuthUser(row: DbUser) {
   return { id: row.id, email: row.email, created_at: row.created_at };
 }
 
-async function createSession(
+export async function createSession(
   pool: pg.Pool,
   config: Config,
   user: DbUser,
@@ -110,13 +112,16 @@ export async function login(
   email: string,
   password: string,
 ): Promise<AuthSession> {
-  const result = await pool.query<DbUser>(
-    `SELECT id, email, password_hash, created_at FROM auth.users WHERE email = $1`,
+  const result = await pool.query<DbUser & { banned_at: string | null }>(
+    `SELECT id, email, password_hash, created_at, banned_at FROM auth.users WHERE email = $1`,
     [email.toLowerCase()],
   );
   const user = result.rows[0];
   if (!user?.password_hash || !verifyPassword(password, user.password_hash)) {
     throw new AppError(401, 'invalid_credentials', 'Invalid email or password');
+  }
+  if (user.banned_at) {
+    throw new AppError(403, 'account_suspended', 'This account has been suspended');
   }
   return createSession(pool, config, user);
 }
@@ -132,8 +137,8 @@ export async function refresh(
   refreshToken: string,
 ): Promise<AuthSession> {
   const refreshHash = hashToken(refreshToken);
-  const result = await pool.query<DbUser & { session_id: string }>(
-    `SELECT u.id, u.email, u.password_hash, u.created_at, s.id AS session_id
+  const result = await pool.query<DbUser & { session_id: string; banned_at: string | null }>(
+    `SELECT u.id, u.email, u.password_hash, u.created_at, u.banned_at, s.id AS session_id
      FROM auth.sessions s
      JOIN auth.users u ON u.id = s.user_id
      WHERE s.refresh_token_hash = $1 AND s.expires_at > NOW()`,
@@ -142,6 +147,10 @@ export async function refresh(
   const row = result.rows[0];
   if (!row) {
     throw new AppError(401, 'invalid_refresh', 'Invalid or expired refresh token');
+  }
+  if (row.banned_at) {
+    await pool.query(`DELETE FROM auth.sessions WHERE user_id = $1`, [row.id]);
+    throw new AppError(403, 'account_suspended', 'This account has been suspended');
   }
 
   await pool.query(`DELETE FROM auth.sessions WHERE id = $1`, [row.session_id]);
@@ -156,13 +165,16 @@ export async function me(pool: pg.Pool, config: Config, accessToken: string) {
     throw new AppError(401, 'invalid_token', 'Invalid or expired access token');
   }
 
-  const result = await pool.query<DbUser>(
-    `SELECT id, email, password_hash, created_at FROM auth.users WHERE id = $1`,
+  const result = await pool.query<DbUser & { banned_at: string | null }>(
+    `SELECT id, email, password_hash, created_at, banned_at FROM auth.users WHERE id = $1`,
     [payload.sub],
   );
   const user = result.rows[0];
   if (!user) {
     throw new AppError(401, 'user_not_found', 'User not found');
+  }
+  if (user.banned_at) {
+    throw new AppError(403, 'account_suspended', 'This account has been suspended');
   }
   return { user: toAuthUser(user) };
 }
@@ -253,12 +265,16 @@ export async function handleGoogleCallback(
     throw new AppError(401, 'oauth_userinfo_failed', 'Incomplete Google user info');
   }
 
-  const existing = await pool.query<DbUser>(
-    `SELECT id, email, password_hash, created_at FROM auth.users WHERE email = $1 OR google_id = $2`,
+  const existing = await pool.query<DbUser & { banned_at: string | null }>(
+    `SELECT id, email, password_hash, created_at, banned_at FROM auth.users WHERE email = $1 OR google_id = $2`,
     [info.email.toLowerCase(), info.sub],
   );
 
-  let user = existing.rows[0];
+  const existingRow = existing.rows[0];
+  if (existingRow?.banned_at) {
+    throw new AppError(403, 'account_suspended', 'This account has been suspended');
+  }
+  let user: DbUser | undefined = existingRow;
   if (user) {
     await pool.query(
       `UPDATE auth.users SET google_id = COALESCE(google_id, $1), email_verified = true, updated_at = NOW() WHERE id = $2`,

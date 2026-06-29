@@ -33,6 +33,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      MAIL_SERVICE_URL: http://mail-service:3004
+      TIMESHEET_PUBLIC_URL: ${TIMESHEET_PUBLIC_URL:-https://timesheet.whitelynx.co.nz}
       AUTH_PORT: "3001"
     depends_on:
       postgres:

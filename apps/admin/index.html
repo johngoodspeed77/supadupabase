@@ -54,11 +54,18 @@
         <section id="view-users" class="sdb-view" hidden>
           <div class="sdb-main__header">
             <h1>Users</h1>
-            <p class="sdb-muted">Registered auth users.</p>
+            <p class="sdb-muted">Manage accounts, verification, suspension, invites, and stored app data.</p>
           </div>
           <div id="users-content" class="sdb-card">
             <div class="sdb-hex-loader" aria-label="Loading"></div>
           </div>
+          <dialog id="user-detail-dialog" class="sdb-dialog">
+            <div class="sdb-dialog__header">
+              <h2 id="user-detail-title">User details</h2>
+              <button type="button" class="sdb-btn sdb-btn--ghost sdb-btn--sm" id="user-detail-close">Close</button>
+            </div>
+            <div id="user-detail-body" class="sdb-dialog__body"></div>
+          </dialog>
         </section>
 
         <section id="view-keys" class="sdb-view" hidden>
@@ -119,6 +126,6 @@
       </main>
     </div>
 
-    <script type="module" src="app.js?v=5"></script>
+    <script type="module" src="app.js?v=6"></script>
   </body>
 </html>
