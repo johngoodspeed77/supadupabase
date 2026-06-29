@@ -5,12 +5,26 @@ import {
   parseFilters,
   parseSelect,
   quoteIdent,
+  userScopeColumn,
 } from './config.js';
+
+function applyUserScope(
+  table: string,
+  userId: string,
+  where: string[],
+  params: unknown[],
+): void {
+  const scopeCol = userScopeColumn(table);
+  if (!scopeCol) return;
+  params.push(userId);
+  where.push(`${quoteIdent(scopeCol)} = $${params.length}`);
+}
 
 export async function selectRows(
   client: pg.PoolClient,
   table: string,
   query: Record<string, string>,
+  userId: string,
 ): Promise<Record<string, unknown>[]> {
   assertAllowedTable(table);
   const columns = parseSelect(query);
@@ -24,6 +38,7 @@ export async function selectRows(
 
   const where: string[] = [];
   const params: unknown[] = [];
+  applyUserScope(table, userId, where, params);
   for (const f of filters) {
     params.push(f.value);
     where.push(`${quoteIdent(f.column)} = $${params.length}`);
@@ -41,6 +56,7 @@ export async function insertRows(
   client: pg.PoolClient,
   table: string,
   body: unknown,
+  userId: string,
 ): Promise<Record<string, unknown>[]> {
   assertAllowedTable(table);
   const rows = Array.isArray(body) ? body : [body];
@@ -48,8 +64,16 @@ export async function insertRows(
     throw new AppError(400, 'validation_error', 'Request body must be an object or array of objects');
   }
 
+  const scopeCol = userScopeColumn(table);
   const inserted: Record<string, unknown>[] = [];
   for (const row of rows as Record<string, unknown>[]) {
+    if (scopeCol) {
+      const existing = row[scopeCol];
+      if (existing != null && String(existing) !== userId) {
+        throw new AppError(403, 'forbidden', 'Cannot insert row for another user');
+      }
+      row[scopeCol] = userId;
+    }
     const keys = Object.keys(row);
     if (!keys.length) {
       throw new AppError(400, 'validation_error', 'Empty row');
@@ -69,6 +93,7 @@ export async function updateRows(
   table: string,
   body: unknown,
   query: Record<string, string>,
+  userId: string,
 ): Promise<Record<string, unknown>[]> {
   assertAllowedTable(table);
   if (typeof body !== 'object' || body === null || Array.isArray(body)) {
@@ -76,6 +101,12 @@ export async function updateRows(
   }
 
   const patch = body as Record<string, unknown>;
+  const scopeCol = userScopeColumn(table);
+  if (scopeCol && patch[scopeCol] != null && String(patch[scopeCol]) !== userId) {
+    throw new AppError(403, 'forbidden', 'Cannot change row ownership');
+  }
+  if (scopeCol) delete patch[scopeCol];
+
   const keys = Object.keys(patch);
   if (!keys.length) {
     throw new AppError(400, 'validation_error', 'No fields to update');
@@ -95,6 +126,7 @@ export async function updateRows(
     .join(', ');
 
   const where: string[] = [];
+  applyUserScope(table, userId, where, params);
   for (const f of filters) {
     params.push(f.value);
     where.push(`${quoteIdent(f.column)} = $${params.length}`);
@@ -109,6 +141,7 @@ export async function deleteRows(
   client: pg.PoolClient,
   table: string,
   query: Record<string, string>,
+  userId: string,
 ): Promise<Record<string, unknown>[]> {
   assertAllowedTable(table);
   const filters = parseFilters(query);
@@ -118,6 +151,7 @@ export async function deleteRows(
 
   const params: unknown[] = [];
   const where: string[] = [];
+  applyUserScope(table, userId, where, params);
   for (const f of filters) {
     params.push(f.value);
     where.push(`${quoteIdent(f.column)} = $${params.length}`);

@@ -50,6 +50,18 @@ export const ALLOWED_TABLES = new Set([
   'week_submissions',
 ]);
 
+/** Column that must match the authenticated user (RLS bypass when DB role is superuser). */
+export const USER_SCOPE_COLUMN: Record<string, string> = {
+  profiles: 'id',
+  user_settings: 'user_id',
+  time_entries: 'user_id',
+  week_submissions: 'user_id',
+};
+
+export function userScopeColumn(table: string): string | null {
+  return USER_SCOPE_COLUMN[table] ?? null;
+}
+
 export function assertAllowedTable(table: string): void {
   if (!ALLOWED_TABLES.has(table)) {
     throw new AppError(404, 'table_not_found', `Table not found: ${table}`);

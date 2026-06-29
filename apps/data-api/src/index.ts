@@ -42,7 +42,7 @@ router.get('/rest/v1/:table', async (ctx) => {
 
   try {
     const rows = await withJwtContext(pool, userId, (client) =>
-      selectRows(client, ctx.params.table, ctx.query),
+      selectRows(client, ctx.params.table, ctx.query, userId),
     );
     jsonResponse(ctx, 200, rows);
   } catch (err) {
@@ -74,7 +74,7 @@ router.post('/rest/v1/:table', async (ctx) => {
 
   try {
     const rows = await withJwtContext(pool, userId, (client) =>
-      insertRows(client, ctx.params.table, ctx.body),
+      insertRows(client, ctx.params.table, ctx.body, userId),
     );
     jsonResponse(ctx, 201, rows.length === 1 ? rows[0] : rows);
   } catch (err) {
@@ -106,7 +106,7 @@ router.patch('/rest/v1/:table', async (ctx) => {
 
   try {
     const rows = await withJwtContext(pool, userId, (client) =>
-      updateRows(client, ctx.params.table, ctx.body, ctx.query),
+      updateRows(client, ctx.params.table, ctx.body, ctx.query, userId),
     );
     jsonResponse(ctx, 200, rows.length === 1 ? rows[0] : rows);
   } catch (err) {
@@ -138,7 +138,7 @@ router.delete('/rest/v1/:table', async (ctx) => {
 
   try {
     const rows = await withJwtContext(pool, userId, (client) =>
-      deleteRows(client, ctx.params.table, ctx.query),
+      deleteRows(client, ctx.params.table, ctx.query, userId),
     );
     jsonResponse(ctx, 200, rows);
   } catch (err) {
