@@ -4,7 +4,7 @@ import {
   clearTokens,
   refreshAuthSession,
   restoreAuthSession,
-} from '/ui/session.js';
+} from './ui/session.js';
 
 const AUTH_URL = (window.__SDB_AUTH_URL ?? window.location.origin).replace(/\/$/, '');
 

@@ -5,7 +5,7 @@ import {
   clearTokens,
   restoreAuthSession,
   refreshAuthSession,
-} from '/ui/session.js';
+} from './ui/session.js';
 
 const AUTH_URL = (window.__SDB_AUTH_URL ?? 'http://localhost:3001').replace(/\/$/, '');
 const DATA_URL = (window.__SDB_DATA_URL ?? 'http://localhost:3002').replace(/\/$/, '');
