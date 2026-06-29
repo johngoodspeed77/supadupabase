@@ -53,7 +53,11 @@ const server = createServer(async (req, res) => {
     const content = await readFile(resolved.filePath);
     res.statusCode = 200;
     res.setHeader('Content-Type', resolved.contentType);
-    if (resolved.contentType.includes('html') || resolved.contentType.includes('javascript')) {
+    if (
+      resolved.contentType.includes('html') ||
+      resolved.contentType.includes('javascript') ||
+      resolved.contentType.includes('css')
+    ) {
       res.setHeader('Cache-Control', 'no-cache');
     }
     res.end(content);
