@@ -88,12 +88,19 @@ async function adminFetch(path, options = {}) {
 }
 
 function showView(name) {
+  if (name === 'login' && state.accessToken) {
+    name = 'projects';
+  }
   els.views.forEach((v) => {
     v.hidden = v.id !== `view-${name}`;
   });
   els.navLinks.forEach((link) => {
     link.classList.toggle('is-active', link.dataset.view === name);
   });
+  const hash = `#${name}`;
+  if (window.location.hash !== hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search + hash);
+  }
   if (name === 'projects') renderProjects();
   if (name === 'users') renderUsers();
   if (name === 'keys') renderKeys();
@@ -179,7 +186,8 @@ els.logoutBtn.addEventListener('click', async () => {
 });
 
 els.googleBtn.addEventListener('click', () => {
-  window.location.href = `${AUTH_URL}/auth/signin/google?redirect_to=${encodeURIComponent(window.location.origin + '/#login')}`;
+  const returnTo = `${window.location.origin}${window.location.pathname}#projects`;
+  window.location.href = `${AUTH_URL}/auth/signin/google?redirect_to=${encodeURIComponent(returnTo)}`;
 });
 
 async function renderProjects() {
@@ -563,13 +571,14 @@ if (params.get('access_token')) {
     refresh_token: params.get('refresh_token'),
     user: null,
   });
-  window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+  window.history.replaceState({}, '', `${window.location.pathname}#projects`);
 }
 
 fetchMe().then(() => {
-  if (initialView !== 'login' && !state.accessToken) {
+  if (!state.accessToken) {
     showView('login');
     return;
   }
-  showView(initialView);
+  const view = initialView === 'login' ? 'projects' : initialView;
+  showView(view);
 });
