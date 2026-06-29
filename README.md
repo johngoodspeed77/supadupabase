@@ -2,20 +2,22 @@
 
 Self-hosted backend for access control and user data storage — a Supabase-inspired platform you run on your own infrastructure.
 
-Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plain SQL migrations, and a zero-dep client SDK. Admin UI uses a **dark Cyan Hexagons** theme with a tessellated honeycomb background.
+Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plain SQL migrations, and a zero-dep client SDK. Admin UI uses a **dark Cyan Hexagons** theme (solid black background).
 
 **Repository:** https://github.com/johngoodspeed77/supadupabase
 
 ## Status
 
-**Save point `v0.2.0-production-alpha`** (2026-06-28) — **production is live** at [supadupabase.whitelynx.co.nz](https://supadupabase.whitelynx.co.nz). Alpha quality; bug-fix pass next.
+**Save point `v0.2.1-production`** (2026-06-29) — **production live** at [supadupabase.whitelynx.co.nz](https://supadupabase.whitelynx.co.nz). Timesheet PWA consumer live at [timesheet.whitelynx.co.nz](https://timesheet.whitelynx.co.nz).
 
-| Done | In progress |
-|------|-------------|
-| Auth, data API, SDK, admin, mail-service | VM/git sync, migration catch-up |
-| Live Cloudflare Tunnel + Docker on Proxmox VM | Data API anon/service key auth, RPC |
-| Timesheet schema + SMTP (Gmail) | Timesheet PWA on production |
-| Admin **Emails** page (test SMTP) | Google OAuth in prod, push reminder cron |
+| Done | Follow-up |
+|------|-----------|
+| Auth, data API, SDK, admin, mail-service | Data API anon/service key auth, RPC |
+| Live Cloudflare Tunnel + Docker (VM106) | Google OAuth for timesheet (optional) |
+| Timesheet schema + SMTP (Gmail) | Weekly push reminder cron verification |
+| Admin **Users** — invite, ban, list | Integration tests |
+| `INVITE_ONLY=1` in production | License |
+| Per-user data-api row scoping | |
 
 Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) · Architecture: [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) · Stack: [docs/STACK.md](./docs/STACK.md)
 
@@ -29,6 +31,7 @@ Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./i
 | Auth | https://supadupabase.whitelynx.co.nz/auth/ |
 | Data API | https://supadupabase.whitelynx.co.nz/rest/v1/… |
 | Mail | https://supadupabase.whitelynx.co.nz/mail/… |
+| Timesheet PWA | https://timesheet.whitelynx.co.nz |
 
 ## Quick start (local)
 
@@ -54,11 +57,11 @@ npm run dev
 
 | Capability | Description |
 |------------|-------------|
-| Auth | In-house email/password + Google OAuth, JWT, sessions |
-| Data API | REST over Postgres with RLS per user |
-| Mail | SMTP outbound (timesheet email, admin test send) |
+| Auth | Email/password + Google OAuth, JWT, sessions; **`INVITE_ONLY`** for closed sign-up |
+| Data API | REST over Postgres with RLS + per-user scoping |
+| Mail | SMTP outbound (timesheet email, admin test send, invite emails) |
 | SDK | `@supadupabase/sdk` — zero runtime deps |
-| Admin | Cyan Hexagons dashboard — projects, users, keys, emails |
+| Admin | Users (invite/ban), projects, API keys, emails |
 | Deploy | Docker Compose + Caddy + Cloudflare Tunnel |
 
 **Not Supabase (yet):** no Storage, Realtime, Edge Functions, SQL editor, or dynamic table API. New tables require SQL migrations and a data-api whitelist update.
@@ -80,11 +83,14 @@ npm run dev
 - **Domain:** https://supadupabase.whitelynx.co.nz
 - **VM:** Proxmox VM106 — see [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md)
 - **SMTP:** Gmail App Password in `.env` (`SMTP_*` vars)
+- **Invite-only:** `INVITE_ONLY=1` in `.env` (passed to `auth-service` via compose)
 
 After code changes on the VM:
 
 ```bash
-docker compose -f infra/docker-compose.yml --env-file .env up -d --build admin mail-service
+cd ~/supadupabase
+git pull
+DOCKER_BUILDKIT=0 docker compose -f infra/docker-compose.yml --env-file .env up -d --build
 ```
 
 ## Client usage
@@ -95,16 +101,15 @@ import { createClient } from '@supadupabase/sdk'
 const client = createClient({
   url: 'https://supadupabase.whitelynx.co.nz',
   authUrl: 'https://supadupabase.whitelynx.co.nz',
-  anonKey: process.env.SUPADUPABASE_ANON_KEY!,
+  accessToken: session.access_token,
 })
 
-await client.auth.signInWithGoogle({ redirectTo: window.location.origin })
-const { data } = await client.from('profiles').select('*')
+const { data } = await client.from('time_entries').select('*')
 ```
 
 ## Theme
 
-Dark mode only — cyan accents (`#22d3ee`) on charcoal with tessellated honeycomb tile. See [docs/THEME.md](./docs/THEME.md).
+Dark mode only — cyan accents (`#22d3ee`) on solid black. See [docs/THEME.md](./docs/THEME.md).
 
 ## License
 

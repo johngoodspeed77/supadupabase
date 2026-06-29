@@ -8,13 +8,13 @@
 
 **Dependency philosophy:** **In-house first** — server runtime dep `pg` only on core services. No Better Auth, Drizzle, Hono, React, or UI frameworks. See [docs/IN_HOUSE.md](./docs/IN_HOUSE.md). *Exception:* `mail-service` uses `web-push` for PWA reminders (owner-approved direction).
 
-**UI:** **Dark mode only** — **Cyan Hexagons** theme (tessellated flat-top honeycomb). See [docs/THEME.md](./docs/THEME.md).
+**UI:** **Dark mode only** — **Cyan Hexagons** theme (solid black background). See [docs/THEME.md](./docs/THEME.md).
 
 **GitHub:** https://github.com/johngoodspeed77/supadupabase (`main`)
 
-## Save point — v0.2.0-production-alpha (2026-06-28)
+## Save point — v0.2.1-production (2026-06-29)
 
-**Current stage:** **Production deployed and publicly reachable.** Alpha quality — active bug-fix backlog. See [SAVEPOINT.md](./SAVEPOINT.md).
+**Current stage:** **Production live** on VM106; Timesheet PWA live on VM101 (invite-only). See [SAVEPOINT.md](./SAVEPOINT.md).
 
 **Public:** https://supadupabase.whitelynx.co.nz  
 **VM:** `supadupabase@192.168.1.112` · compose at `~/supadupabase`  
@@ -25,26 +25,24 @@
 ### Completed
 
 - [x] Monorepo scaffold (`packages/shared`, `server`, `db`, `ui`, `sdk`)
-- [x] Auth service (email, Google OAuth, refresh, admin routes, API keys)
-- [x] Data API (GET/POST/PATCH/DELETE, RLS on whitelisted tables)
-- [x] Admin UI (projects, users, API keys, **Emails** test page)
-- [x] Sample PWA + Timesheet schema/migrations (`002`–`005`)
-- [x] **mail-service** — SMTP send, timesheet submit, admin test email, Web Push API (WIP)
-- [x] Proxmox VM + Docker Compose production stack
+- [x] Auth service (email, Google OAuth, refresh, admin routes, API keys, **`INVITE_ONLY`**)
+- [x] Data API (GET/POST/PATCH/DELETE, RLS, **per-user row scoping**)
+- [x] Admin UI (projects, **Users** invite/ban, API keys, **Emails** test page)
+- [x] Timesheet schema/migrations (`002`–`008`)
+- [x] **mail-service** — SMTP, timesheet submit, invite email, Web Push API
+- [x] Proxmox VM106 + VM101 Timesheet (Option B)
 - [x] Cloudflare Tunnel → Caddy → services
-- [x] Gmail SMTP documented and configured on VM
+- [x] Gmail SMTP on VM106
+- [x] Admin auth path fix behind `/admin` reverse proxy
 - [x] Local dev: `docker-compose.dev.yml`, `DEV.md`, `npm run dev`
 
 ### In progress / deferred
 
-- [ ] **Bug-fix pass** — see [SAVEPOINT.md § Known bugs](./SAVEPOINT.md#known-bugs--tech-debt-fix-next)
-- [ ] Sync VM with `git` (end `scp` drift); apply migrations `003`–`005` in prod
-- [ ] Production Google OAuth credentials in `.env`
 - [ ] Data API: RPC, anon/service key auth on `/rest`
-- [ ] Admin: create projects from UI; expose new tables without code whitelist edits
+- [ ] Admin: create projects from UI; dynamic table whitelist
 - [ ] Auth: verification + password-reset emails
-- [ ] Timesheet PWA on `timesheet.whitelynx.co.nz` (VM101) — Option B; redeploy with `SDB_PUBLIC_URL`
-- [ ] Weekly push reminder cron + VAPID in production
+- [ ] Google OAuth for timesheet origin (optional while invite-only)
+- [ ] Weekly push reminder cron fully verified in prod
 - [ ] Integration tests (RLS + JWT)
 - [ ] License
 
