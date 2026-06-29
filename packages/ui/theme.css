@@ -1,5 +1,5 @@
 :root {
-  --sdb-bg-deep: #06080c;
+  --sdb-bg-deep: #000000;
   --sdb-bg: #0b1018;
   --sdb-bg-raised: #111827;
   --sdb-bg-hover: #1a2332;
@@ -48,36 +48,16 @@ body {
 body {
   font-family: var(--sdb-font);
   color: var(--sdb-text);
-  background-color: var(--sdb-bg-deep);
+  background: #000000;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Full-page hex wallpaper (packages/ui/hex-background.png) */
 .sdb-shell {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
-  background-color: var(--sdb-bg-deep);
-}
-
-.sdb-shell::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background-color: var(--sdb-bg-deep);
-  background-image: url("hex-background.png");
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-  background-attachment: fixed;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sdb-shell::before {
-    background-attachment: scroll;
-  }
+  background: #000000;
 }
 
 a {
