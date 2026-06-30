@@ -10,6 +10,60 @@ export interface SmtpConfig {
   secure: boolean;
 }
 
+export interface SendMailOptions {
+  /** RFC 5322 From header (display); envelope MAIL FROM stays on the SMTP account. */
+  from?: string;
+  replyTo?: string;
+}
+
+function sanitizeHeaderValue(value: string): string {
+  return value.replace(/[\r\n]/g, '');
+}
+
+/** Build `"Display Name" <email@domain>` for message headers. */
+export function formatMailbox(displayName: string, email: string): string {
+  const safeEmail = sanitizeHeaderValue(email.trim());
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+    throw new Error('Invalid email address');
+  }
+  const rawName = sanitizeHeaderValue(displayName.trim()) || safeEmail.split('@')[0];
+  const escaped = rawName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}" <${safeEmail}>`;
+}
+
+/** SMTP envelope sender — must match the authenticated SMTP account. */
+export function envelopeAddress(from: string): string {
+  const angle = from.match(/<([^>]+)>/);
+  if (angle) return angle[1].trim();
+  return from.trim();
+}
+
+function buildMimeBody(
+  headers: string[],
+  boundary: string,
+  text: string,
+  html: string,
+): string {
+  return [
+    ...headers,
+    'MIME-Version: 1.0',
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
+    'Content-Type: text/plain; charset=utf-8',
+    '',
+    text,
+    '',
+    `--${boundary}`,
+    'Content-Type: text/html; charset=utf-8',
+    '',
+    html,
+    '',
+    `--${boundary}--`,
+    '.',
+  ].join('\r\n');
+}
+
 function readResponse(socket: Socket | TLSSocket): Promise<string> {
   return new Promise((resolve, reject) => {
     const onData = (chunk: Buffer) => {
@@ -46,7 +100,19 @@ export async function sendMail(
   subject: string,
   html: string,
   text: string,
+  options: SendMailOptions = {},
 ): Promise<void> {
+  const fromHeader = options.from ?? config.from;
+  const mailFrom = envelopeAddress(config.from);
+  const headers = [
+    `From: ${fromHeader}`,
+    `To: ${to}`,
+    `Subject: ${sanitizeHeaderValue(subject)}`,
+  ];
+  if (options.replyTo) {
+    headers.push(`Reply-To: ${options.replyTo}`);
+  }
+
   const socket: Socket | TLSSocket = config.secure
     ? tlsConnect({ host: config.host, port: config.port, rejectUnauthorized: true })
     : createConnection({ host: config.host, port: config.port });
@@ -71,31 +137,12 @@ export async function sendMail(
       expectCode(await sendCmd(upgraded, 'AUTH LOGIN'), '334');
       expectCode(await sendCmd(upgraded, Buffer.from(config.user).toString('base64')), '334');
       expectCode(await sendCmd(upgraded, Buffer.from(config.pass).toString('base64')), '235');
-      expectCode(await sendCmd(upgraded, `MAIL FROM:<${config.from}>`), '250');
+      expectCode(await sendCmd(upgraded, `MAIL FROM:<${mailFrom}>`), '250');
       expectCode(await sendCmd(upgraded, `RCPT TO:<${to}>`), '250');
       expectCode(await sendCmd(upgraded, 'DATA'), '354');
 
       const boundary = `----TimesheetApp${Date.now()}`;
-      const body = [
-        `From: ${config.from}`,
-        `To: ${to}`,
-        `Subject: ${subject}`,
-        'MIME-Version: 1.0',
-        `Content-Type: multipart/alternative; boundary="${boundary}"`,
-        '',
-        `--${boundary}`,
-        'Content-Type: text/plain; charset=utf-8',
-        '',
-        text,
-        '',
-        `--${boundary}`,
-        'Content-Type: text/html; charset=utf-8',
-        '',
-        html,
-        '',
-        `--${boundary}--`,
-        '.',
-      ].join('\r\n');
+      const body = buildMimeBody(headers, boundary, text, html);
 
       expectCode(await sendCmd(upgraded, body), '250');
       await sendCmd(upgraded, 'QUIT');
@@ -109,31 +156,12 @@ export async function sendMail(
       expectCode(await sendCmd(socket, Buffer.from(config.pass).toString('base64')), '235');
     }
 
-    expectCode(await sendCmd(socket, `MAIL FROM:<${config.from}>`), '250');
+    expectCode(await sendCmd(socket, `MAIL FROM:<${mailFrom}>`), '250');
     expectCode(await sendCmd(socket, `RCPT TO:<${to}>`), '250');
     expectCode(await sendCmd(socket, 'DATA'), '354');
 
     const boundary = `----TimesheetApp${Date.now()}`;
-    const body = [
-      `From: ${config.from}`,
-      `To: ${to}`,
-      `Subject: ${subject}`,
-      'MIME-Version: 1.0',
-      `Content-Type: multipart/alternative; boundary="${boundary}"`,
-      '',
-      `--${boundary}`,
-      'Content-Type: text/plain; charset=utf-8',
-      '',
-      text,
-      '',
-      `--${boundary}`,
-      'Content-Type: text/html; charset=utf-8',
-      '',
-      html,
-      '',
-      `--${boundary}--`,
-      '.',
-    ].join('\r\n');
+    const body = buildMimeBody(headers, boundary, text, html);
 
     expectCode(await sendCmd(socket, body), '250');
     await sendCmd(socket, 'QUIT');

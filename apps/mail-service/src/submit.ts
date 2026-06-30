@@ -3,7 +3,7 @@ import { AppError } from '@supadupabase/shared';
 import { withJwtContext } from '@supadupabase/db';
 import { addDays, calcWeek } from './hours.js';
 import { buildTimesheetEmail } from './email.js';
-import { sendMail } from './smtp.js';
+import { sendMail, formatMailbox } from './smtp.js';
 import { toSmtpConfig, type MailServiceConfig } from './config.js';
 
 interface UserRow {
@@ -86,7 +86,10 @@ export async function submitTimesheet(
       week,
     );
 
-    await sendMail(toSmtpConfig(config), settings.boss_email, subject, html, text);
+    await sendMail(toSmtpConfig(config), settings.boss_email, subject, html, text, {
+      from: formatMailbox(employeeName, user.email),
+      replyTo: user.email,
+    });
 
     const insertRes = await client.query<{ submitted_at: string }>(
       `INSERT INTO public.week_submissions (user_id, week_start, email_sent_to)
