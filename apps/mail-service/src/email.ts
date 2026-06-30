@@ -1,5 +1,7 @@
 import { formatDateNz, formatHours, formatWeekRange, type WeekCalc } from './hours.js';
 
+const TIMESHEET_EMAIL_TITLE = 'Fuzed Group- Employee Weekly Timesheet';
+
 function esc(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -48,7 +50,7 @@ export function buildTimesheetEmail(
 <html>
 <head><meta charset="utf-8"><title>${esc(subject)}</title></head>
 <body style="font-family:system-ui,sans-serif;color:#111;">
-  <h1>Timesheet App</h1>
+  <h1>${esc(TIMESHEET_EMAIL_TITLE)}</h1>
   <p><strong>Employee:</strong> ${esc(employeeName)}<br>
   <strong>Email:</strong> ${esc(employeeEmail)}<br>
   <strong>Week:</strong> ${esc(range)}</p>
@@ -70,12 +72,12 @@ export function buildTimesheetEmail(
       </tr>
     </tfoot>
   </table>
-  <p style="color:#64748b;font-size:12px;">Sent from Timesheet App. Lunch break (30 min) deducted per work day. Leave hours: full day = 8h, AM/PM = 4h.</p>
+  <p style="color:#64748b;font-size:12px;">Sent from ${esc(TIMESHEET_EMAIL_TITLE)}. Lunch break (30 min) deducted per work day. Leave hours: full day = 8h, AM/PM = 4h.</p>
 </body>
 </html>`;
 
   const textLines = [
-    'Timesheet App',
+    TIMESHEET_EMAIL_TITLE,
     `Employee: ${employeeName}`,
     `Email: ${employeeEmail}`,
     `Week: ${range}`,
