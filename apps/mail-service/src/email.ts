@@ -1,4 +1,4 @@
-import { formatDateNz, formatHours, formatWeekRange, type WeekCalc } from './hours.js';
+import { addDays, formatDateNz, formatHours, formatWeekRange, type WeekCalc } from './hours.js';
 
 const TIMESHEET_EMAIL_TITLE = 'Fuzed Group- Employee Weekly Timesheet';
 
@@ -17,7 +17,8 @@ export function buildTimesheetEmail(
   week: WeekCalc,
 ): { subject: string; html: string; text: string } {
   const range = formatWeekRange(weekStart);
-  const subject = `Timesheet — ${employeeName} — Week of ${formatDateNz(weekStart)}`;
+  const weekEnding = formatDateNz(addDays(weekStart, 6));
+  const subject = `Timesheet — ${employeeName} — Week ending ${weekEnding}`;
 
   const rows = week.days
     .map((d) => {

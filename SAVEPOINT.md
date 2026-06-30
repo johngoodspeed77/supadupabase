@@ -1,13 +1,13 @@
-# Save point — v0.2.1-production
+# Save point — v0.2.2-production
 
-**Date:** 2026-06-29  
-**Git tag:** `v0.2.1-production`  
+**Date:** 2026-06-30  
+**Git tag:** `v0.2.2-production`  
 **Repository:** https://github.com/johngoodspeed77/supadupabase  
 **Branch:** `main`
 
 ## Milestone summary
 
-**Production stable** on VM106. Timesheet PWA on VM101 is live and invite-only. Admin user management, per-user data scoping, SMTP, and `INVITE_ONLY` auth are deployed.
+**Production stable** on VM106. Timesheet PWA on VM101 at **v0.3.1-production** integration (PWA `v0.3.0-production`, mail improvements below). Leave-entry schema (migration 009), boss timesheet email from the submitting employee, and **Fuzed Group** email branding deployed.
 
 ## Production (live)
 
@@ -49,9 +49,18 @@ docker compose -f infra/docker-compose.yml --env-file .env up -d --build auth-se
 - **Invite-only mode** — `INVITE_ONLY=1` in `.env`; admin creates users via Users → Invite
 - Data API: REST CRUD with JWT + RLS; **per-user row scoping** enforced server-side
 - Admin: projects, **Users** (list, ban, invite, revoke), API keys, Emails test page
-- SDK, SQL migrations `001`–`008`
-- mail-service: SMTP, timesheet submit email, Web Push API
+- SDK, SQL migrations `001`–`009`
+- mail-service: SMTP, timesheet submit email (leave rows), Web Push API
 - Docker Compose + Caddy + Cloudflare Tunnel
+
+### Since v0.2.1-production
+
+| Commit | Summary |
+|--------|---------|
+| `4b138df` | Leave types on `time_entries`; timesheet email template for leave rows |
+| `92c1e2b` | Timesheet submit **From** = `"Employee Name" <user@email>`; **Reply-To** = user email; SMTP envelope `MAIL FROM` stays `SMTP_FROM` |
+| `fe60026` | Boss email title/footer → **Fuzed Group- Employee Weekly Timesheet** (`TIMESHEET_EMAIL_TITLE`) |
+| *(this release)* | Email subject **Week ending** + Sunday date (not Week of Monday) |
 
 ### Since v0.2.0-production-alpha
 
@@ -67,7 +76,21 @@ docker compose -f infra/docker-compose.yml --env-file .env up -d --build auth-se
 
 ## Migrations (repo)
 
-`001_init` → `008_user_management` — apply on VM with migrate profile or `npm run migrate`.
+`001_init` → `009_leave_entries` — apply on VM with migrate profile or `npm run migrate`.
+
+Migration **009** adds `entry_type`, `leave_type`, `leave_duration`, nullable times + CHECK constraints for leave/work rows.
+
+## Timesheet submit email behaviour
+
+| Header / field | Value |
+|----------------|--------|
+| `From` (display) | `"Employee Name" <user@email>` from `user_settings.employee_name` or email local-part |
+| `Reply-To` | Submitting user's login email |
+| SMTP `MAIL FROM` | `SMTP_FROM` (Gmail account on VM106) |
+| Email title (HTML) | **Fuzed Group- Employee Weekly Timesheet** |
+| Subject | `Timesheet — {name} — Week ending {Sunday DD/MM/YYYY}` |
+
+Gmail may show "via gmail.com" when the `From` domain is not a verified send-as alias; replies still go to the employee via `Reply-To`.
 
 ## Environment variables (production `.env`)
 
@@ -78,7 +101,7 @@ docker compose -f infra/docker-compose.yml --env-file .env up -d --build auth-se
 | `ADMIN_EMAILS` | Admin login allowlist |
 | `INVITE_ONLY` | `1` — block public sign-up and new Google accounts |
 | `TUNNEL_TOKEN` | cloudflared profile |
-| `SMTP_*` | Gmail outbound mail |
+| `SMTP_*` | Gmail outbound mail (`SMTP_FROM` = envelope sender) |
 | `GOOGLE_CLIENT_ID/SECRET` | Optional OAuth |
 | `VAPID_*` | Web Push (mail-service) |
 | `TIMESHEET_PUBLIC_URL` | `https://timesheet.whitelynx.co.nz` (invite links) |
@@ -90,7 +113,7 @@ Never commit `.env` or tunnel tokens.
 - Data API: anon/service key auth on `/rest`; RPC
 - Google OAuth for timesheet origin (optional while invite-only)
 - Weekly push reminder cron fully verified in prod
-- Integration tests (RLS + JWT)
+- Integration tests (RLS + JWT, submit flow)
 - License
 
 ## Restore / run locally
@@ -98,7 +121,7 @@ Never commit `.env` or tunnel tokens.
 ```bash
 git clone https://github.com/johngoodspeed77/supadupabase.git
 cd supadupabase
-git checkout v0.2.1-production
+git checkout v0.2.2-production
 npm install && npm run build
 cp .env.example .env
 docker compose -f infra/docker-compose.dev.yml up -d
@@ -108,4 +131,4 @@ npm run dev
 
 ## Last updated
 
-2026-06-29
+2026-06-30

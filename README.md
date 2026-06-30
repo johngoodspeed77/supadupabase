@@ -8,7 +8,7 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 
 ## Status
 
-**Save point `v0.2.1-production`** (2026-06-29) — **production live** at [supadupabase.whitelynx.co.nz](https://supadupabase.whitelynx.co.nz). Timesheet PWA consumer live at [timesheet.whitelynx.co.nz](https://timesheet.whitelynx.co.nz).
+**Save point `v0.2.2-production`** (2026-06-30) — **production live** at [supadupabase.whitelynx.co.nz](https://supadupabase.whitelynx.co.nz). Timesheet PWA at [timesheet.whitelynx.co.nz](https://timesheet.whitelynx.co.nz) (**v0.3.1-production** integration).
 
 | Done | Follow-up |
 |------|-----------|
@@ -18,6 +18,8 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 | Admin **Users** — invite, ban, list | Integration tests |
 | `INVITE_ONLY=1` in production | License |
 | Per-user data-api row scoping | |
+| Migration **009** leave entries | |
+| Timesheet email **From** employee + **Fuzed Group** branding | |
 
 Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) · Architecture: [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) · Stack: [docs/STACK.md](./docs/STACK.md)
 

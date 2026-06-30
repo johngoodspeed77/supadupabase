@@ -12,9 +12,9 @@
 
 **GitHub:** https://github.com/johngoodspeed77/supadupabase (`main`)
 
-## Save point — v0.2.1-production (2026-06-29)
+## Save point — v0.2.2-production (2026-06-30)
 
-**Current stage:** **Production live** on VM106; Timesheet PWA live on VM101 (invite-only). See [SAVEPOINT.md](./SAVEPOINT.md).
+**Current stage:** **Production live** on VM106; Timesheet PWA live on VM101 (invite-only, **v0.3.1-production** integration). See [SAVEPOINT.md](./SAVEPOINT.md).
 
 **Public:** https://supadupabase.whitelynx.co.nz  
 **VM:** `supadupabase@192.168.1.112` · compose at `~/supadupabase`  
@@ -28,8 +28,8 @@
 - [x] Auth service (email, Google OAuth, refresh, admin routes, API keys, **`INVITE_ONLY`**)
 - [x] Data API (GET/POST/PATCH/DELETE, RLS, **per-user row scoping**)
 - [x] Admin UI (projects, **Users** invite/ban, API keys, **Emails** test page)
-- [x] Timesheet schema/migrations (`002`–`008`)
-- [x] **mail-service** — SMTP, timesheet submit, invite email, Web Push API
+- [x] Timesheet schema/migrations (`002`–`009`)
+- [x] **mail-service** — SMTP, timesheet submit (leave rows, employee **From** / **Reply-To**, **Fuzed Group** title), invite email, Web Push API
 - [x] Proxmox VM106 + VM101 Timesheet (Option B)
 - [x] Cloudflare Tunnel → Caddy → services
 - [x] Gmail SMTP on VM106
@@ -130,7 +130,7 @@ Admin routes require bearer JWT + email in `ADMIN_EMAILS`.
 | GET | `/mail/healthz` | Health |
 | GET | `/admin/mail/status` | SMTP configured? (admin) |
 | POST | `/admin/mail/test` | Send test email `{ to }` (admin) |
-| POST | `/mail/timesheet/submit` | Email weekly timesheet to boss |
+| POST | `/mail/timesheet/submit` | Email weekly timesheet to boss (`From` employee, `Reply-To` user, Fuzed Group template) |
 | GET | `/mail/push/vapid-public-key` | VAPID public key |
 | POST | `/mail/push/subscribe` | Save push subscription |
 | POST | `/mail/push/unsubscribe` | Remove subscription |
@@ -175,4 +175,4 @@ Caddy routes `/admin/mail/*` → mail-service. `ADMIN_EMAILS` must be set on mai
 
 ## Last updated
 
-2026-06-28 — Save point v0.2.0-production-alpha; production live; Emails admin + mail-service; bug backlog documented.
+2026-06-30 — Save point v0.2.2-production: migration 009 leave entries; timesheet email From employee + Fuzed Group branding (`92c1e2b`, `fe60026`).
