@@ -64,7 +64,7 @@ const targets = {
       process.env.DEPLOY_WEBHOOK_URL_VM106 ??
       'https://supadupabase.whitelynx.co.nz/hooks/deploy',
     body: {
-      services: services || 'auth-service data-api mail-service admin caddy',
+      services: services || 'auth-service data-api mail-service admin',
       migrate,
     },
   },

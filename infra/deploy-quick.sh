@@ -22,7 +22,7 @@ fi
 # shellcheck disable=SC1091
 source .env
 
-SERVICES="${DEPLOY_SERVICES:-auth-service data-api mail-service admin caddy}"
+SERVICES="${DEPLOY_SERVICES:-auth-service data-api mail-service admin}"
 
 echo "==> Pull latest from origin/main"
 git fetch origin main

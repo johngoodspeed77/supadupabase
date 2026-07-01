@@ -27,9 +27,9 @@ jobs:
           URL: ${{ secrets.DEPLOY_WEBHOOK_URL_VM106 }}
         run: |
           set -euo pipefail
-          BODY='{"services":"auth-service data-api mail-service admin caddy"}'
+          BODY='{"services":"auth-service data-api mail-service admin"}'
           if [ "${{ inputs.migrate }}" = "true" ]; then
-            BODY='{"services":"auth-service data-api mail-service admin caddy","migrate":true}'
+            BODY='{"services":"auth-service data-api mail-service admin","migrate":true}'
           fi
           curl -fsS -X POST "${URL:-https://supadupabase.whitelynx.co.nz/hooks/deploy}" \
             -H "Authorization: Bearer ${DEPLOY_HOOK_SECRET}" \
