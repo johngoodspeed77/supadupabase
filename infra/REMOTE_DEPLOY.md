@@ -142,9 +142,26 @@ curl -X POST https://supadupabase.whitelynx.co.nz/hooks/deploy \
 |---------|-----|
 | `401 Unauthorized` | Wrong `DEPLOY_HOOK_SECRET` |
 | `503 deploy_disabled` | Secret not set in VM `.env` or deploy-hook not running |
-| `502` on `/hooks/*` | `docker compose --profile remote up -d deploy-hook` |
-| VM101 hook unreachable | Add Cloudflare path route for `/hooks/*` → port `5189` |
+| `502` on VM106 `/hooks/*` | deploy-hook container down — SSH to VM106, run `./infra/enable-remote-deploy.sh` |
+| VM101 hook OK but PWA old | Run deploy with valid secret: `node scripts/remote-deploy.mjs --target timesheet` |
+| VM101 hook unreachable | Add Cloudflare path `/hooks/*` → port `5189` |
 | `deploy_busy` | Wait for current deploy to finish |
+| Tunnel timeout on deploy | Use latest `main` — hook returns **202** immediately (`42ca69e`) |
+
+## Status check (2026-07-01)
+
+| Target | `/hooks/healthz` | `POST /hooks/deploy` (no auth) | Notes |
+|--------|------------------|--------------------------------|-------|
+| VM106 `supadupabase.whitelynx.co.nz` | **502** | **502** | Hook not reachable — fix at home |
+| VM101 `timesheet.whitelynx.co.nz` | **200** `enabled: true` | **401** | Hook working; auth required |
+| Timesheet PWA assets | — | — | Still `app.js?v=28` — deploy pending |
+
+Quick check from any network:
+
+```bash
+curl -fsS https://timesheet.whitelynx.co.nz/hooks/healthz
+curl -fsS https://supadupabase.whitelynx.co.nz/hooks/healthz
+```
 
 ## Related
 

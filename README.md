@@ -12,10 +12,10 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 
 | Done (on GitHub `main`) | Follow-up |
 |---------------------------|-----------|
-| Auth, data API, SDK, admin, mail-service | **Deploy `main` to VM106** (home PC) |
-| Invite-only email/password (**no Google OAuth**) | Enable remote deploy hooks (one-time) |
-| **Remote deploy** — `deploy-hook`, GitHub Actions | Data API anon/service key auth, RPC |
-| `HOME_PC_SETUP.md` for home LAN deploy | Integration tests, license |
+| Auth, data API, SDK, admin, mail-service | **Fix VM106 deploy-hook** (502 on `/hooks/*`) |
+| Invite-only email/password (**no Google OAuth**) | **Deploy timesheet** via VM101 hook (still on `app.js?v=28`) |
+| **Remote deploy** — VM101 hook ✅, VM106 ❌ | Enable VM106 hook at home |
+| `HOME_PC_SETUP.md` for home LAN deploy | Data API anon/service key auth, RPC |
 | Timesheet schema + SMTP, admin Users | Weekly push cron verification |
 
 Details: [SAVEPOINT.md](./SAVEPOINT.md) · **Home deploy:** [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) · Remote: [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md)

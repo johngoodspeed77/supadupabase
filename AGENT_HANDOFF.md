@@ -40,8 +40,8 @@
 
 ### In progress / deferred
 
-- [ ] **Deploy `main` to VM106** — home PC or remote hook (see HOME_PC_SETUP.md)
-- [ ] **Enable remote deploy hooks** on VM106 + VM101 (one-time `DEPLOY_HOOK_SECRET`)
+- [ ] **Fix VM106 deploy-hook** — `/hooks/healthz` returns **502** (2026-07-01)
+- [ ] **Deploy timesheet to VM101** — hook OK; production still `app.js?v=28`
 - [ ] Data API: RPC, anon/service key auth on `/rest`
 - [ ] Admin: create projects from UI; dynamic table whitelist
 - [ ] Auth: verification + password-reset emails
@@ -168,4 +168,4 @@ See full table in prior docs or mail-service routes.
 
 ## Last updated
 
-2026-06-27 — v0.3.0-development: OAuth removed; remote deploy + home PC setup (`2ee9aae`).
+2026-07-01 — Remote deploy: VM101 OK, VM106 502; pulled `42ca69e` (202 async deploy).

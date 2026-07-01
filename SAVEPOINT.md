@@ -1,7 +1,7 @@
 # Save point — v0.3.0-development
 
-**Date:** 2026-06-27  
-**Git commit:** `2ee9aae` (main)  
+**Date:** 2026-07-01  
+**Git commit:** `42ca69e` (main)  
 **Repository:** https://github.com/johngoodspeed77/supadupabase  
 **Branch:** `main`  
 **Previous tag:** `v0.2.2-production`
@@ -35,18 +35,17 @@ curl https://supadupabase.whitelynx.co.nz/mail/healthz
 | `76be153` | **Remove Google OAuth** — routes, config, UI, SDK `signInWithGoogle` |
 | `9fdc6aa` | **`deploy-hook`** service, `deploy-quick.sh`, `REMOTE_DEPLOY.md`, `npm run deploy:remote` |
 | `2ee9aae` | **`HOME_PC_SETUP.md`**, `enable-remote-deploy.sh`, `.github/DEPLOY_FROM_GITHUB.md` |
+| `3d0c616`–`42ca69e` | deploy-hook host user + **202 async** deploy (Cloudflare timeout fix) |
 
-### Remote deploy (code ready; hooks not enabled on VMs yet)
+### Remote deploy status (checked 2026-07-01)
 
-| Piece | Status |
-|-------|--------|
-| `apps/deploy-hook` | In repo |
-| `POST /hooks/deploy` via Caddy | Needs `--profile remote` on VM106 |
-| `DEPLOY_HOOK_SECRET` | Not set on VMs until home setup |
-| GitHub Actions `deploy.yml` | Ready; needs repo secret |
-| VM101 `/hooks/*` Cloudflare path | Needs one-time tunnel rule → port 5189 |
+| Target | `/hooks/healthz` | Notes |
+|--------|------------------|-------|
+| VM101 Timesheet | ✅ **200** `enabled: true` | `POST` without token → **401** (correct) |
+| VM106 SupaDupaBase | ❌ **502** | deploy-hook not reachable — run `enable-remote-deploy.sh` on VM106 |
+| Timesheet PWA | — | Still `app.js?v=28` on production — deploy pending |
 
-See [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md).
+See [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md).
 
 ## What still works (unchanged on live VM)
 
@@ -105,4 +104,4 @@ npm run dev
 
 ## Last updated
 
-2026-06-27 — Save point v0.3.0-development: OAuth removed, remote deploy + home PC setup (`2ee9aae`).
+2026-07-01 — Remote deploy check: VM101 hook OK; VM106 hook 502; timesheet PWA not yet redeployed.
