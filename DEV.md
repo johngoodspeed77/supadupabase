@@ -44,14 +44,6 @@ curl http://localhost:3002/rest/v1/profiles \
 2. Sign up via sample PWA or curl
 3. Open admin → Login → Projects / Users / API Keys
 
-## Google OAuth (optional)
-
-Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. Add redirect URI:
-
-`http://localhost:3001/auth/callback/google`
-
-Set `PUBLIC_URL=http://localhost:3001` for local OAuth.
-
 ## Production
 
 See [infra/DEPLOY.md](./infra/DEPLOY.md) and [infra/PROXMOX.md](./infra/PROXMOX.md).

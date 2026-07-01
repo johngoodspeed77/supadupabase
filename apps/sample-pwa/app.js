@@ -110,10 +110,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   await loadProfile();
 });
 
-document.getElementById('google-btn').addEventListener('click', () => {
-  window.location.href = `${AUTH_URL}/auth/signin/google?redirect_to=${encodeURIComponent(window.location.origin)}`;
-});
-
 document.getElementById('save-profile').addEventListener('click', async () => {
   const meRes = await fetch(`${AUTH_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${client.getAccessToken()}` },

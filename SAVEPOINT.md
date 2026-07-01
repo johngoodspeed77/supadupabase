@@ -45,7 +45,7 @@ docker compose -f infra/docker-compose.yml --env-file .env up -d --build auth-se
 
 ### Core
 
-- Auth: email/password, JWT sessions, refresh, Google OAuth (code ready; `INVITE_ONLY=1` blocks new sign-ups in prod)
+- Auth: email/password, JWT sessions, refresh (`INVITE_ONLY=1` blocks new sign-ups in prod)
 - **Invite-only mode** — `INVITE_ONLY=1` in `.env`; admin creates users via Users → Invite
 - Data API: REST CRUD with JWT + RLS; **per-user row scoping** enforced server-side
 - Admin: projects, **Users** (list, ban, invite, revoke), API keys, Emails test page
@@ -99,10 +99,9 @@ Gmail may show "via gmail.com" when the `From` domain is not a verified send-as 
 | `POSTGRES_PASSWORD`, `AUTH_SECRET` | Required |
 | `JWT_ISSUER`, `PUBLIC_URL` | `https://supadupabase.whitelynx.co.nz` |
 | `ADMIN_EMAILS` | Admin login allowlist |
-| `INVITE_ONLY` | `1` — block public sign-up and new Google accounts |
+| `INVITE_ONLY` | `1` — block public sign-up |
 | `TUNNEL_TOKEN` | cloudflared profile |
 | `SMTP_*` | Gmail outbound mail (`SMTP_FROM` = envelope sender) |
-| `GOOGLE_CLIENT_ID/SECRET` | Optional OAuth |
 | `VAPID_*` | Web Push (mail-service) |
 | `TIMESHEET_PUBLIC_URL` | `https://timesheet.whitelynx.co.nz` (invite links) |
 
@@ -111,7 +110,6 @@ Never commit `.env` or tunnel tokens.
 ## Known follow-up
 
 - Data API: anon/service key auth on `/rest`; RPC
-- Google OAuth for timesheet origin (optional while invite-only)
 - Weekly push reminder cron fully verified in prod
 - Integration tests (RLS + JWT, submit flow)
 - License

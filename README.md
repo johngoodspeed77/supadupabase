@@ -13,7 +13,7 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 | Done | Follow-up |
 |------|-----------|
 | Auth, data API, SDK, admin, mail-service | Data API anon/service key auth, RPC |
-| Live Cloudflare Tunnel + Docker (VM106) | Google OAuth for timesheet (optional) |
+| Live Cloudflare Tunnel + Docker (VM106) | Weekly push reminder cron verification |
 | Timesheet schema + SMTP (Gmail) | Weekly push reminder cron verification |
 | Admin **Users** — invite, ban, list | Integration tests |
 | `INVITE_ONLY=1` in production | License |
@@ -59,7 +59,7 @@ npm run dev
 
 | Capability | Description |
 |------------|-------------|
-| Auth | Email/password + Google OAuth, JWT, sessions; **`INVITE_ONLY`** for closed sign-up |
+| Auth | Email/password, JWT, sessions; **`INVITE_ONLY`** for closed sign-up |
 | Data API | REST over Postgres with RLS + per-user scoping |
 | Mail | SMTP outbound (timesheet email, admin test send, invite emails) |
 | SDK | `@supadupabase/sdk` — zero runtime deps |
@@ -74,7 +74,6 @@ npm run dev
 |-------|----------------|
 | HTTP | `packages/server` — Node `http` + tiny router |
 | Auth | `node:crypto` scrypt + HMAC JWT |
-| Google login | In-house OAuth (`fetch` to Google) |
 | Mail | In-house SMTP client + optional `web-push` |
 | Database | PostgreSQL 16 + plain SQL migrations |
 | Server deps | **`pg` only** (core); `web-push` in mail-service |

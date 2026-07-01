@@ -25,7 +25,7 @@
 ### Completed
 
 - [x] Monorepo scaffold (`packages/shared`, `server`, `db`, `ui`, `sdk`)
-- [x] Auth service (email, Google OAuth, refresh, admin routes, API keys, **`INVITE_ONLY`**)
+- [x] Auth service (email/password, refresh, admin routes, API keys, **`INVITE_ONLY`**)
 - [x] Data API (GET/POST/PATCH/DELETE, RLS, **per-user row scoping**)
 - [x] Admin UI (projects, **Users** invite/ban, API keys, **Emails** test page)
 - [x] Timesheet schema/migrations (`002`–`009`)
@@ -41,7 +41,6 @@
 - [ ] Data API: RPC, anon/service key auth on `/rest`
 - [ ] Admin: create projects from UI; dynamic table whitelist
 - [ ] Auth: verification + password-reset emails
-- [ ] Google OAuth for timesheet origin (optional while invite-only)
 - [ ] Weekly push reminder cron fully verified in prod
 - [ ] Integration tests (RLS + JWT)
 - [ ] License
@@ -50,7 +49,7 @@
 
 - Central auth and user data for multiple sites/PWAs
 - Full control on own hardware (Proxmox)
-- Google login + email/password
+- Email/password login with admin invites
 - Remote access via Cloudflare Tunnel (no router port forwarding)
 - Supabase-like DX (`createClient`, `.from('table').select()`)
 - Outbound email from `johngoodspeed77@gmail.com` (Gmail App Password in `.env`)
@@ -64,7 +63,7 @@
 | NPM package | `@supadupabase/sdk` |
 | GitHub | `johngoodspeed77/supadupabase` |
 | Dependencies | In-house first — server: `pg` only; `web-push` in mail-service |
-| Auth | scrypt + JWT; Google OAuth via `fetch` |
+| Auth | scrypt + JWT; invite-only email/password |
 | Data API | `packages/server` on Node `http` |
 | Migrations | Plain SQL + migration runner |
 | Admin UI | Static HTML + Cyan Hexagons CSS + vanilla JS |
@@ -100,10 +99,9 @@ supadupabase/
 1. **Bug-fix pass** — work through [SAVEPOINT.md](./SAVEPOINT.md) known bugs list
 2. `git pull` on VM + full rebuild + `migrate` profile
 3. Verify Emails test send end-to-end in admin
-4. Google OAuth production credentials
-5. Wire Timesheet PWA to production API
-6. anon/service key auth on data API
-7. RLS integration tests
+4. Wire Timesheet PWA to production API
+5. anon/service key auth on data API
+6. RLS integration tests
 
 ## Auth service contract
 
@@ -114,8 +112,6 @@ supadupabase/
 | POST | `/auth/logout` | End session |
 | POST | `/auth/refresh` | Refresh access token |
 | GET | `/auth/me` | Current user |
-| GET | `/auth/signin/google` | Start Google OAuth |
-| GET | `/auth/callback/google` | OAuth callback |
 | POST | `/auth/api-keys` | Create API key (admin) |
 | GET | `/admin/projects` | List projects (admin) |
 | GET | `/admin/users` | List users (admin) |
@@ -148,7 +144,7 @@ Caddy routes `/admin/mail/*` → mail-service. `ADMIN_EMAILS` must be set on mai
 
 ## Security rules (non-negotiable)
 
-- Never commit `.env`, tunnel tokens, Google secrets, SMTP passwords, VAPID private keys
+- Never commit `.env`, tunnel tokens, SMTP passwords, VAPID private keys
 - Never expose `service_role` keys to browsers
 - Parameterized queries only in data API
 - No third-party auth/ORM/UI frameworks without owner approval

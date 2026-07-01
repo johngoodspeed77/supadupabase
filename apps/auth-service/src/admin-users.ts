@@ -10,7 +10,6 @@ export interface UserListRow {
   id: string;
   email: string;
   email_verified: boolean;
-  google_id: string | null;
   banned_at: string | null;
   banned_reason: string | null;
   created_at: string;
@@ -67,7 +66,6 @@ export async function listUsers(pool: pg.Pool): Promise<UserListRow[]> {
        u.id,
        u.email,
        u.email_verified,
-       u.google_id,
        u.banned_at,
        u.banned_reason,
        u.created_at,
@@ -89,7 +87,7 @@ export async function listUsers(pool: pg.Pool): Promise<UserListRow[]> {
 
 export async function getUserDetail(pool: pg.Pool, userId: string) {
   const user = await pool.query(
-    `SELECT id, email, email_verified, google_id, banned_at, banned_reason, created_at, updated_at
+    `SELECT id, email, email_verified, banned_at, banned_reason, created_at, updated_at
      FROM auth.users WHERE id = $1`,
     [userId],
   );

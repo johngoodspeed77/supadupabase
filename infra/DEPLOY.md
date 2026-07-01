@@ -6,8 +6,6 @@ Deploy on the dedicated Proxmox VM with Docker Compose, Caddy, and Cloudflare Tu
 
 - VM provisioned per [PROXMOX.md](./PROXMOX.md)
 - Domain `supadupabase.whitelynx.co.nz` in Cloudflare
-- Google OAuth client with redirect URI:
-  `https://supadupabase.whitelynx.co.nz/auth/callback/google`
 
 ## 1. Environment
 
@@ -22,7 +20,6 @@ Set at minimum:
 - `DATABASE_URL` — matches compose postgres service
 - `PUBLIC_URL=https://supadupabase.whitelynx.co.nz`
 - `JWT_ISSUER=https://supadupabase.whitelynx.co.nz`
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
 - `ADMIN_EMAILS=you@example.com`
 
 ## 2. Build and start

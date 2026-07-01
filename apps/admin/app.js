@@ -22,7 +22,6 @@ const els = {
   logoutBtn: document.getElementById('logout-btn'),
   loginForm: document.getElementById('login-form'),
   loginError: document.getElementById('login-error'),
-  googleBtn: document.getElementById('google-btn'),
   projectsBody: document.getElementById('projects-body'),
   usersContent: document.getElementById('users-content'),
   keysContent: document.getElementById('keys-content'),
@@ -51,7 +50,6 @@ function userStatusBadges(u) {
   if (u.banned_at) badges.push('<span class="sdb-badge sdb-badge--danger">suspended</span>');
   else if (u.email_verified) badges.push('<span class="sdb-badge sdb-badge--success">verified</span>');
   else badges.push('<span class="sdb-badge sdb-badge--warning">unverified</span>');
-  if (u.google_id) badges.push('<span class="sdb-badge">google</span>');
   return badges.join(' ');
 }
 
@@ -183,11 +181,6 @@ els.logoutBtn.addEventListener('click', async () => {
   }
   clearSession();
   showView('login');
-});
-
-els.googleBtn.addEventListener('click', () => {
-  const returnTo = `${window.location.origin}${window.location.pathname}#projects`;
-  window.location.href = `${AUTH_URL}/auth/signin/google?redirect_to=${encodeURIComponent(returnTo)}`;
 });
 
 async function renderProjects() {
@@ -394,7 +387,6 @@ async function showUserDetail(userId) {
       <dt>User ID</dt><dd><code>${esc(u.id)}</code></dd>
       <dt>Email</dt><dd>${esc(u.email)}</dd>
       <dt>Verified</dt><dd>${u.email_verified ? 'Yes' : 'No'}</dd>
-      <dt>Google</dt><dd>${u.google_id ? 'Linked' : '—'}</dd>
       <dt>Status</dt><dd>${u.banned_at ? `Suspended since ${new Date(u.banned_at).toLocaleString()}${u.banned_reason ? ` — ${esc(u.banned_reason)}` : ''}` : 'Active'}</dd>
       <dt>Created</dt><dd>${new Date(u.created_at).toLocaleString()}</dd>
       <dt>Updated</dt><dd>${new Date(u.updated_at).toLocaleString()}</dd>
@@ -499,7 +491,7 @@ async function renderEmails() {
   } catch (err) {
     const msg =
       err.message === 'Invalid or expired access token'
-        ? 'Your admin session expired. Use Logout, then sign in again. (This is not your Google app password.)'
+        ? 'Your admin session expired. Use Logout, then sign in again with your admin password.'
         : err.message;
     els.smtpStatus.innerHTML = `<p class="sdb-dim">${msg}</p>`;
     els.testEmailForm.querySelector('button').disabled = true;

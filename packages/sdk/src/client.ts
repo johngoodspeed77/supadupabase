@@ -206,13 +206,6 @@ export class SupaDupaBaseClient {
       this.accessToken = body.access_token;
       return { data: body, error: null };
     },
-
-    signInWithGoogle: (opts: { redirectTo?: string } = {}): void => {
-      const params = new URLSearchParams();
-      if (opts.redirectTo) params.set('redirect_to', opts.redirectTo);
-      const qs = params.toString();
-      window.location.href = `${this.authBaseUrl()}/auth/signin/google${qs ? `?${qs}` : ''}`;
-    },
   };
 
   getAccessToken(): string | null {

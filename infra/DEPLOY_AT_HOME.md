@@ -9,7 +9,6 @@ Use this when you're at the Proxmox host. **Do not deploy on your dev PC** — o
 - [ ] Docker + Docker Compose installed on the VM
 - [ ] Cloudflare DNS for `supadupabase.whitelynx.co.nz`
 - [ ] Cloudflare Tunnel created (Zero Trust → Networks → Tunnels)
-- [ ] Google OAuth client (optional until you need Google login)
 
 ## 1. Clone on the VM
 
@@ -33,7 +32,6 @@ nano .env
 | `AUTH_SECRET` | `openssl rand -base64 32` |
 | `ADMIN_EMAILS` | Your email (comma-separated for multiple admins) |
 | `TUNNEL_TOKEN` | From Cloudflare tunnel setup |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | When ready for Google login |
 
 Leave `JWT_ISSUER` and `PUBLIC_URL` as `https://supadupabase.whitelynx.co.nz`.
 
@@ -73,23 +71,13 @@ curl http://localhost/rest/healthz
 
 Open https://supadupabase.whitelynx.co.nz/admin/ — sign in with an email listed in `ADMIN_EMAILS`.
 
-## 6. Google OAuth (when ready)
-
-1. Google Cloud Console → OAuth client → Web application
-2. Redirect URI: `https://supadupabase.whitelynx.co.nz/auth/callback/google`
-3. Add client ID/secret to `.env`, then:
-
-```bash
-docker compose -f infra/docker-compose.yml --env-file .env up -d --build auth-service
-```
-
-## 7. Create API keys
+## 6. Create API keys
 
 1. Sign in to admin
 2. Go to **API Keys** → create `anon` and `service_role` keys
 3. Use `anon` key in your PWAs via `@supadupabase/sdk`
 
-## 8. Outbound email (Gmail / Timesheet App)
+## 7. Outbound email (Gmail / Timesheet App)
 
 The **mail-service** sends weekly timesheet submissions to a boss email. Auth signup does **not** send verification emails yet.
 

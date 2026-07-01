@@ -30,8 +30,6 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET}
       JWT_ISSUER: ${JWT_ISSUER:-https://supadupabase.whitelynx.co.nz}
       PUBLIC_URL: ${PUBLIC_URL:-https://supadupabase.whitelynx.co.nz}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       MAIL_SERVICE_URL: http://mail-service:3004
       TIMESHEET_PUBLIC_URL: ${TIMESHEET_PUBLIC_URL:-https://timesheet.whitelynx.co.nz}

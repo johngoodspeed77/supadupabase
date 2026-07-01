@@ -14,10 +14,6 @@ import {
   logout,
   refresh,
   me,
-  createOAuthState,
-  consumeOAuthState,
-  googleAuthUrl,
-  handleGoogleCallback,
   bearerToken,
 } from './auth.js';
 
@@ -89,64 +85,6 @@ router.get('/auth/me', async (ctx) => {
   }
   const result = await me(pool, config, token);
   jsonResponse(ctx, 200, result);
-});
-
-router.get('/auth/signin/google', async (ctx) => {
-  if (config.inviteOnly) {
-    errorResponse(ctx, 403, 'Google sign-in is disabled for new users. Use your invited account.', 'signup_disabled');
-    return;
-  }
-  if (!config.googleClientId) {
-    errorResponse(ctx, 503, 'Google OAuth is not configured', 'oauth_not_configured');
-    return;
-  }
-  const redirectTo = ctx.query.redirect_to ?? null;
-  const state = await createOAuthState(pool, redirectTo);
-  const url = googleAuthUrl(config, state);
-  ctx.res.statusCode = 302;
-  ctx.res.setHeader('Location', url);
-  ctx.res.end();
-});
-
-router.get('/auth/callback/google', async (ctx) => {
-  const code = ctx.query.code;
-  const state = ctx.query.state;
-  const oauthError = ctx.query.error;
-
-  if (oauthError) {
-    errorResponse(ctx, 401, String(oauthError), 'oauth_denied');
-    return;
-  }
-  if (!code || !state) {
-    errorResponse(ctx, 400, 'Missing code or state', 'validation_error');
-    return;
-  }
-
-  const oauthState = await consumeOAuthState(pool, state);
-  if (!oauthState.ok) {
-    errorResponse(ctx, 400, 'Invalid or expired OAuth state', 'invalid_state');
-    return;
-  }
-
-  try {
-    const session = await handleGoogleCallback(pool, config, code);
-    if (oauthState.redirectTo) {
-      const target = new URL(oauthState.redirectTo);
-      target.searchParams.set('access_token', session.access_token);
-      target.searchParams.set('refresh_token', session.refresh_token);
-      ctx.res.statusCode = 302;
-      ctx.res.setHeader('Location', target.toString());
-      ctx.res.end();
-      return;
-    }
-    jsonResponse(ctx, 200, session);
-  } catch (err) {
-    if (isAppError(err)) {
-      errorResponse(ctx, err.status, err.message, err.code);
-    } else {
-      throw err;
-    }
-  }
 });
 
 router.get('/admin/projects', async (ctx) => {

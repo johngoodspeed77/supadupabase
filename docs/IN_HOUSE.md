@@ -6,14 +6,14 @@ SupaDupaBase is built to run with **minimal external application dependencies**.
 
 | Build ourselves | Accept only when impractical to replace |
 |-----------------|----------------------------------------|
-| Auth (email, JWT, sessions, Google OAuth flow) | PostgreSQL (database engine) |
+| Auth (email, JWT, sessions) | PostgreSQL (database engine) |
 | HTTP routing and request handling | `pg` (Postgres wire protocol client) |
 | Data API (REST, query builder, RLS context) | Node.js runtime |
 | SQL migrations (plain `.sql` files) | OS packages on VM (Docker, Caddy, cloudflared) |
-| `@supadupabase/sdk` (fetch-based) | Google OAuth **as identity provider** (external login, in-house integration) |
-| Admin UI (HTML + CSS + vanilla JS) | Cloudflare Tunnel (network path to your VM) |
+| `@supadupabase/sdk` (fetch-based) | Cloudflare Tunnel (network path to your VM) |
 | Password hashing via `node:crypto` scrypt | |
 | JWT sign/verify via `node:crypto` HMAC | |
+| Admin UI (HTML + CSS + vanilla JS) | |
 
 ## Explicitly excluded (do not add without owner approval)
 
@@ -51,16 +51,6 @@ packages/
   sdk/        # Client for sites/PWAs
   ui/         # Cyan Hexagons theme (see THEME.md)
 ```
-
-## Google OAuth (in-house implementation)
-
-No OAuth library — implement authorization code flow directly:
-
-1. `GET /auth/signin/google` → redirect to Google with `client_id`, `redirect_uri`, `state`, `scope`
-2. `GET /auth/callback/google` → verify `state`, exchange `code` for tokens via `fetch` to Google token endpoint
-3. Fetch userinfo, upsert `auth.users`, issue session + JWT
-
-Store OAuth state in Postgres or signed cookie.
 
 ## When to reconsider
 
