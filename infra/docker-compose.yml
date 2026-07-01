@@ -128,6 +128,22 @@ services:
     networks:
       - sdb
 
+  deploy-hook:
+    profiles: ["remote"]
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.deploy-hook
+    restart: unless-stopped
+    environment:
+      DEPLOY_HOOK_SECRET: ${DEPLOY_HOOK_SECRET:-}
+      DEPLOY_HOOK_PORT: "3005"
+      REPO_ROOT: /repo
+    volumes:
+      - ..:/repo
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - sdb
+
   cloudflared:
     profiles: ["tunnel"]
     image: cloudflare/cloudflared:latest

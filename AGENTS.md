@@ -22,4 +22,5 @@ Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first.
 | `apps/auth-service` | Auth (email/password, invites) |
 | `apps/data-api` | REST + RLS |
 | `apps/mail-service` | SMTP, timesheet email, push, admin mail test |
+| `apps/deploy-hook` | Remote HTTPS deploy webhook (VM106) |
 | `apps/admin` | Static admin UI |

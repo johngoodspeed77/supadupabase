@@ -83,6 +83,7 @@ npm run dev
 
 - **Domain:** https://supadupabase.whitelynx.co.nz
 - **VM:** Proxmox VM106 — see [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md)
+- **Remote deploy:** [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md) — deploy from anywhere via Cloudflare
 - **SMTP:** Gmail App Password in `.env` (`SMTP_*` vars)
 - **Invite-only:** `INVITE_ONLY=1` in `.env` (passed to `auth-service` via compose)
 

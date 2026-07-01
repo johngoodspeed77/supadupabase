@@ -13,7 +13,9 @@
     "dev:data": "npm run dev -w @supadupabase/data-api",
     "dev:admin": "npm run dev -w @supadupabase/admin",
     "dev:sample": "npm run dev -w @supadupabase/sample-pwa",
-    "dev:mail": "npm run dev -w @supadupabase/mail-service"
+    "dev:mail": "npm run dev -w @supadupabase/mail-service",
+    "deploy:remote": "node scripts/remote-deploy.mjs",
+    "deploy:remote:timesheet": "node scripts/remote-deploy.mjs --target timesheet"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -58,6 +58,13 @@ else
   echo "==> Skipping cloudflared (set TUNNEL_TOKEN in .env to enable)"
 fi
 
+if [[ -n "${DEPLOY_HOOK_SECRET:-}" ]]; then
+  echo "==> Start remote deploy hook"
+  $COMPOSE --profile remote up -d --build deploy-hook
+else
+  echo "==> Skipping deploy-hook (set DEPLOY_HOOK_SECRET in .env for remote deploy)"
+fi
+
 echo "==> Status"
 $COMPOSE ps
 

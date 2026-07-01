@@ -164,6 +164,7 @@ Caddy routes `/admin/mail/*` → mail-service. `ADMIN_EMAILS` must be set on mai
 - [SAVEPOINT.md](./SAVEPOINT.md)
 - [AGENTS.md](./AGENTS.md)
 - [DEV.md](./DEV.md)
+- [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md)
 - [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md)
 - [docs/STACK.md](./docs/STACK.md)
 - [docs/IN_HOUSE.md](./docs/IN_HOUSE.md)

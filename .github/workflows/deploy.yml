@@ -1,0 +1,57 @@
+name: Remote deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: What to deploy
+        type: choice
+        options:
+          - supadupabase
+          - timesheet
+          - both
+        default: supadupabase
+      migrate:
+        description: Run database migrations (SupaDupaBase only)
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy SupaDupaBase (VM106)
+        if: inputs.target == 'supadupabase' || inputs.target == 'both'
+        env:
+          DEPLOY_HOOK_SECRET: ${{ secrets.DEPLOY_HOOK_SECRET }}
+          URL: ${{ secrets.DEPLOY_WEBHOOK_URL_VM106 }}
+        run: |
+          set -euo pipefail
+          BODY='{"services":"auth-service data-api mail-service admin caddy"}'
+          if [ "${{ inputs.migrate }}" = "true" ]; then
+            BODY='{"services":"auth-service data-api mail-service admin caddy","migrate":true}'
+          fi
+          curl -fsS -X POST "${URL:-https://supadupabase.whitelynx.co.nz/hooks/deploy}" \
+            -H "Authorization: Bearer ${DEPLOY_HOOK_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "$BODY" | jq .
+
+      - name: Deploy Timesheet (VM101)
+        if: inputs.target == 'timesheet' || inputs.target == 'both'
+        env:
+          DEPLOY_HOOK_SECRET: ${{ secrets.DEPLOY_HOOK_SECRET }}
+          URL: ${{ secrets.DEPLOY_WEBHOOK_URL_VM101 }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST "${URL:-https://timesheet.whitelynx.co.nz/hooks/deploy}" \
+            -H "Authorization: Bearer ${DEPLOY_HOOK_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d '{}' | jq .
+
+      - name: Health check SupaDupaBase
+        if: inputs.target == 'supadupabase' || inputs.target == 'both'
+        run: curl -fsS https://supadupabase.whitelynx.co.nz/auth/healthz
+
+      - name: Health check Timesheet
+        if: inputs.target == 'timesheet' || inputs.target == 'both'
+        run: curl -fsS -o /dev/null -w "timesheet HTTP %{http_code}\n" https://timesheet.whitelynx.co.nz/

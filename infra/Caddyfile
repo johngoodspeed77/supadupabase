@@ -13,6 +13,10 @@
 		reverse_proxy mail-service:3004
 	}
 
+	handle /hooks/* {
+		reverse_proxy deploy-hook:3005
+	}
+
 	handle /admin/projects {
 		reverse_proxy auth-service:3001
 	}

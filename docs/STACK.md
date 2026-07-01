@@ -53,6 +53,8 @@ git pull
 docker compose -f infra/docker-compose.yml --env-file .env up -d --build
 ```
 
+**Away from home:** see [infra/REMOTE_DEPLOY.md](../supadupabase/infra/REMOTE_DEPLOY.md) — HTTPS deploy webhook via Cloudflare.
+
 After Timesheet changes on VM101:
 
 ```bash
