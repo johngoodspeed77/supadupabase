@@ -8,7 +8,7 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 
 ## Status
 
-**Save point `v0.3.0-development`** (2026-06-27) — **production live** at [supadupabase.whitelynx.co.nz](https://supadupabase.whitelynx.co.nz) (last deployed tag `v0.2.2-production`). **`main` on GitHub** includes OAuth removal + remote deploy — **pending VM deploy**. Timesheet: [timesheet.whitelynx.co.nz](https://timesheet.whitelynx.co.nz) (`v0.3.2-development` on GitHub, pending VM101).
+**Save point `v0.3.0-development`** (2026-07-01) — **`main` at `7421989` on GitHub.** Production still on tag `v0.2.2-production` until home deploy.
 
 | Done (on GitHub `main`) | Follow-up |
 |---------------------------|-----------|

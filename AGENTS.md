@@ -1,6 +1,6 @@
 # Agent instructions
 
-Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first. Save point: **v0.3.0-development** ([SAVEPOINT.md](./SAVEPOINT.md)).
+Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first. Save point: **v0.3.0-development** (`7421989`) — [SAVEPOINT.md](./SAVEPOINT.md). **Deploy at home:** [HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md#quick-checklist--run-when-you-get-home).
 
 ## Non-negotiables
 

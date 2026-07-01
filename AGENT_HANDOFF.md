@@ -12,9 +12,11 @@
 
 **GitHub:** https://github.com/johngoodspeed77/supadupabase (`main`)
 
-## Save point — v0.3.0-development (2026-06-27)
+## Save point — v0.3.0-development (2026-07-01)
 
-**Current stage:** **Production live** on VM106 at tag `v0.2.2-production`; **`main` ahead** with OAuth removal + remote deploy (not deployed to VM yet). Timesheet on VM101 last deployed `v0.3.1-production`; timesheet `main` has v0.3.2 UI (pending deploy). See [SAVEPOINT.md](./SAVEPOINT.md).
+**Current stage:** **Production live** on VM106 at tag `v0.2.2-production`; **`main` at `7421989`** — OAuth removed, remote deploy, home checklist — **VM deploy pending**. Timesheet **v0.3.2** on GitHub; production still v28. See [SAVEPOINT.md](./SAVEPOINT.md).
+
+**Next:** Owner runs [HOME_PC_SETUP.md Quick checklist](./infra/HOME_PC_SETUP.md#quick-checklist--run-when-you-get-home) at home.
 
 **Public:** https://supadupabase.whitelynx.co.nz  
 **VM:** `supadupabase@192.168.1.112` · compose at `~/supadupabase`  
@@ -32,7 +34,7 @@
 - [x] Timesheet schema/migrations (`002`–`009`)
 - [x] **mail-service** — SMTP, timesheet submit (leave rows, employee **From** / **Reply-To**, **Fuzed Group** title), invite email, Web Push API
 - [x] **deploy-hook** + `deploy-quick.sh` — remote HTTPS deploy via Cloudflare (`9fdc6aa`)
-- [x] **HOME_PC_SETUP.md** + GitHub Actions `deploy.yml` (`2ee9aae`)
+- [x] **HOME_PC_SETUP.md** quick checklist + GitHub Actions (`7421989`)
 - [x] Proxmox VM106 + VM101 Timesheet (Option B)
 - [x] Cloudflare Tunnel → Caddy → services
 - [x] Gmail SMTP on VM106
@@ -102,10 +104,10 @@ supadupabase/
 
 ## Next work (recommended order)
 
-1. **Home PC deploy** — [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) section A (VM106 + VM101)
-2. **Enable remote hooks** — section B + GitHub secret `DEPLOY_HOOK_SECRET`
-3. anon/service key auth on data API
-4. RLS integration tests
+1. **Owner home deploy** — [Quick checklist](./infra/HOME_PC_SETUP.md#quick-checklist--run-when-you-get-home)
+2. Verify VM106 `/hooks/healthz` → 200; timesheet `app.js?v=29` live
+3. Optional: remote hooks section B + GitHub `DEPLOY_HOOK_SECRET`
+4. anon/service key auth on data API; RLS integration tests
 
 ## Auth service contract
 
@@ -168,4 +170,4 @@ See full table in prior docs or mail-service routes.
 
 ## Last updated
 
-2026-07-01 — Remote deploy: VM101 OK, VM106 502; pulled `42ca69e` (202 async deploy).
+2026-07-01 — v0.3.0-development: all on GitHub (`7421989`); home deploy checklist; VM deploy pending.

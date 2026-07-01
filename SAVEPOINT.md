@@ -1,14 +1,23 @@
 # Save point — v0.3.0-development
 
 **Date:** 2026-07-01  
-**Git commit:** `42ca69e` (main)  
+**Git commit:** `7421989` (main)  
 **Repository:** https://github.com/johngoodspeed77/supadupabase  
 **Branch:** `main`  
 **Previous tag:** `v0.2.2-production`
 
 ## Milestone summary
 
-**Code on GitHub; VM deploy pending.** Since `v0.2.2-production`: Google OAuth removed (email/password + invite-only only), **remote deploy** via HTTPS webhooks (`deploy-hook`), home PC setup guide, and GitHub Actions workflow. Timesheet consumer at **v0.3.2-development** (dirty Save UI) also on GitHub — not yet on VM101.
+**All code on GitHub — VM deploy pending (owner deploying at home).** Since `v0.2.2-production`: Google OAuth removed, remote deploy webhooks, home PC quick checklist. Timesheet **v0.3.2-development** (dirty Save UI) on GitHub — not yet on VM101.
+
+## Next action (owner)
+
+Run the **[Quick checklist](./infra/HOME_PC_SETUP.md#quick-checklist--run-when-you-get-home)** in `HOME_PC_SETUP.md` from home LAN:
+
+1. VM106 — `git pull` + `./infra/deploy-quick.sh`
+2. VM106 — `./infra/enable-remote-deploy.sh` (fix hook **502**)
+3. VM101 — timesheet rebuild (`app.js?v=29`)
+4. Verify hooks + hard-refresh PWA
 
 ## Production (live — last deployed tag)
 
@@ -28,22 +37,24 @@ curl https://supadupabase.whitelynx.co.nz/rest/healthz
 curl https://supadupabase.whitelynx.co.nz/mail/healthz
 ```
 
-## What’s new on `main` (not yet on VM)
+## What’s on `main` (pending VM deploy)
 
 | Commit | Summary |
 |--------|---------|
-| `76be153` | **Remove Google OAuth** — routes, config, UI, SDK `signInWithGoogle` |
-| `9fdc6aa` | **`deploy-hook`** service, `deploy-quick.sh`, `REMOTE_DEPLOY.md`, `npm run deploy:remote` |
-| `2ee9aae` | **`HOME_PC_SETUP.md`**, `enable-remote-deploy.sh`, `.github/DEPLOY_FROM_GITHUB.md` |
-| `3d0c616`–`42ca69e` | deploy-hook host user + **202 async** deploy (Cloudflare timeout fix) |
+| `76be153` | **Remove Google OAuth** |
+| `9fdc6aa` | **`deploy-hook`**, `deploy-quick.sh`, remote deploy |
+| `2ee9aae` | `HOME_PC_SETUP.md`, GitHub Actions |
+| `3d0c616`–`42ca69e` | deploy-hook host user + **202 async** response |
+| `957c877` | Remote deploy status docs (VM101 OK, VM106 502) |
+| `7421989` | **Home deploy quick checklist** |
 
-### Remote deploy status (checked 2026-07-01)
+### Remote deploy status (2026-07-01)
 
 | Target | `/hooks/healthz` | Notes |
 |--------|------------------|-------|
-| VM101 Timesheet | ✅ **200** `enabled: true` | `POST` without token → **401** (correct) |
-| VM106 SupaDupaBase | ❌ **502** | deploy-hook not reachable — run `enable-remote-deploy.sh` on VM106 |
-| Timesheet PWA | — | Still `app.js?v=28` on production — deploy pending |
+| VM101 Timesheet | ✅ **200** | Auth enforced (`401` without token) |
+| VM106 SupaDupaBase | ❌ **502** | Fix with `enable-remote-deploy.sh` at home |
+| Timesheet PWA | — | Still `app.js?v=28` until VM101 deploy |
 
 See [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md).
 
@@ -55,36 +66,16 @@ See [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md).
 - mail-service: timesheet submit, Fuzed Group branding, leave rows
 - Migrations `001`–`009`
 
-## Deploy pending changes
-
-**At home (LAN):**
-
-```bash
-ssh supadupabase@192.168.1.112
-cd ~/supadupabase && git pull && chmod +x infra/deploy-quick.sh && ./infra/deploy-quick.sh
-```
-
-**Enable remote deploy (once):**
-
-```bash
-# Add DEPLOY_HOOK_SECRET to .env, then:
-./infra/enable-remote-deploy.sh
-```
-
-**From GitHub Actions:** Actions → Remote deploy (after `DEPLOY_HOOK_SECRET` secret + hooks live).
-
-## Environment variables (additions)
+## Environment variables
 
 | Variable | Purpose |
 |----------|---------|
-| `DEPLOY_HOOK_SECRET` | Bearer token for `POST /hooks/deploy` (generate: `openssl rand -base64 32`) |
+| `DEPLOY_HOOK_SECRET` | Remote deploy bearer token (`openssl rand -base64 32`) |
 
-Removed from docs/examples: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+Removed: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
-## Known follow-up
+## Known follow-up (after home deploy)
 
-- Deploy `main` to VM106 (+ timesheet `main` to VM101)
-- One-time remote deploy hook setup on both VMs
 - Data API: anon/service key auth; RPC
 - Weekly push reminder cron verification
 - Integration tests; license
@@ -93,15 +84,13 @@ Removed from docs/examples: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
 ```bash
 git clone https://github.com/johngoodspeed77/supadupabase.git
-cd supadupabase
-git checkout main   # or v0.2.2-production for last tagged release
+cd supadupabase && git checkout main
 npm install && npm run build
 cp .env.example .env
 docker compose -f infra/docker-compose.dev.yml up -d
-npm run migrate
-npm run dev
+npm run migrate && npm run dev
 ```
 
 ## Last updated
 
-2026-07-01 — Remote deploy check: VM101 hook OK; VM106 hook 502; timesheet PWA not yet redeployed.
+2026-07-01 — Save point synced; home deploy checklist on GitHub (`7421989`); VM deploy pending.
