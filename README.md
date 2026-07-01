@@ -18,7 +18,9 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 | `HOME_PC_SETUP.md` for home LAN deploy | Data API anon/service key auth, RPC |
 | Timesheet schema + SMTP, admin Users | Weekly push cron verification |
 
-Details: [SAVEPOINT.md](./SAVEPOINT.md) · **Home deploy:** [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) · Remote: [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md)
+Details: [SAVEPOINT.md](./SAVEPOINT.md) · **Deploy at home:** [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) · Remote: [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md)
+
+> **When you get home:** run the [Quick checklist](./infra/HOME_PC_SETUP.md#quick-checklist--run-when-you-get-home) in `HOME_PC_SETUP.md` (VM106 + VM101 deploy, fix VM106 hook 502).
 
 **Cursor workspace:** `E:\White Lynx Projects\Cursor\whitelynx.code-workspace`
 

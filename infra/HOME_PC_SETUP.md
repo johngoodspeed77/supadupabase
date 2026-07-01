@@ -4,6 +4,44 @@ Use this on your **home PC** (on the same LAN as the Proxmox VMs). Open Cursor a
 
 **Repos:** [supadupabase](https://github.com/johngoodspeed77/supadupabase) · [timesheet-app](https://github.com/johngoodspeed77/timesheet-app)
 
+**Latest on GitHub (2026-07-01):** OAuth removed · remote deploy hooks · timesheet dirty-Save UI · VM101 hook OK · **VM106 hook needs fix (502)**
+
+---
+
+## Quick checklist — run when you get home
+
+Copy-paste into home Cursor or a terminal:
+
+```powershell
+# 1. Pull latest on home PC (if using local clones)
+cd supadupabase && git pull origin main
+cd ../timesheet-app && git pull origin main
+
+# 2. Deploy VM106 (SupaDupaBase)
+ssh supadupabase@192.168.1.112 "cd ~/supadupabase && git pull origin main && chmod +x infra/deploy-quick.sh infra/enable-remote-deploy.sh && ./infra/deploy-quick.sh"
+
+# 3. Fix VM106 deploy-hook (502) — skip if healthz already OK
+ssh supadupabase@192.168.1.112 "cd ~/supadupabase && ./infra/enable-remote-deploy.sh && curl -fsS http://localhost/hooks/healthz"
+
+# 4. Deploy VM101 (Timesheet — dirty Save UI, app.js v29)
+ssh johngoodspeed@192.168.1.19 "cd /opt/timesheet-app && git pull origin main && chmod +x infra/deploy-quick.sh && DOCKER_BUILDKIT=0 docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build timesheet-app"
+```
+
+**Verify after deploy:**
+
+```bash
+curl -fsS https://supadupabase.whitelynx.co.nz/hooks/healthz    # expect 200
+curl -fsS https://timesheet.whitelynx.co.nz/hooks/healthz         # expect 200
+curl -fsS https://supadupabase.whitelynx.co.nz/auth/healthz       # expect ok
+```
+
+Open https://timesheet.whitelynx.co.nz → hard refresh (Ctrl+Shift+R). Confirm:
+- No **Delete** button on daily rows
+- **Save** only appears after you edit a day
+- View source shows `app.js?v=29`, `styles.css?v=14`
+
+**Optional — remote deploy from away PC later:** complete [section B](#b-one-time-enable-remote-deploy-deploy-from-anywhere-later) and add `DEPLOY_HOOK_SECRET` to GitHub Actions secrets.
+
 ---
 
 ## A. Deploy now (at home, no remote hooks)
