@@ -21,7 +21,7 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 | Migration **009** leave entries | |
 | Timesheet email **From** employee + **Fuzed Group** branding | |
 
-Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) · Architecture: [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) · Stack: [docs/STACK.md](./docs/STACK.md)
+Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) · **Home PC:** [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) · Remote: [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md)
 
 **Cursor workspace:** `E:\White Lynx Projects\Cursor\whitelynx.code-workspace`
 
