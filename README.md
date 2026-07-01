@@ -8,20 +8,17 @@ Built **in-house** with minimal dependencies: custom auth, custom HTTP API, plai
 
 ## Status
 
-**Save point `v0.2.2-production`** (2026-06-30) — **production live** at [supadupabase.whitelynx.co.nz](https://supadupabase.whitelynx.co.nz). Timesheet PWA at [timesheet.whitelynx.co.nz](https://timesheet.whitelynx.co.nz) (**v0.3.1-production** integration).
+**Save point `v0.3.0-development`** (2026-06-27) — **production live** at [supadupabase.whitelynx.co.nz](https://supadupabase.whitelynx.co.nz) (last deployed tag `v0.2.2-production`). **`main` on GitHub** includes OAuth removal + remote deploy — **pending VM deploy**. Timesheet: [timesheet.whitelynx.co.nz](https://timesheet.whitelynx.co.nz) (`v0.3.2-development` on GitHub, pending VM101).
 
-| Done | Follow-up |
-|------|-----------|
-| Auth, data API, SDK, admin, mail-service | Data API anon/service key auth, RPC |
-| Live Cloudflare Tunnel + Docker (VM106) | Weekly push reminder cron verification |
-| Timesheet schema + SMTP (Gmail) | Weekly push reminder cron verification |
-| Admin **Users** — invite, ban, list | Integration tests |
-| `INVITE_ONLY=1` in production | License |
-| Per-user data-api row scoping | |
-| Migration **009** leave entries | |
-| Timesheet email **From** employee + **Fuzed Group** branding | |
+| Done (on GitHub `main`) | Follow-up |
+|---------------------------|-----------|
+| Auth, data API, SDK, admin, mail-service | **Deploy `main` to VM106** (home PC) |
+| Invite-only email/password (**no Google OAuth**) | Enable remote deploy hooks (one-time) |
+| **Remote deploy** — `deploy-hook`, GitHub Actions | Data API anon/service key auth, RPC |
+| `HOME_PC_SETUP.md` for home LAN deploy | Integration tests, license |
+| Timesheet schema + SMTP, admin Users | Weekly push cron verification |
 
-Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md) · **Home PC:** [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) · Remote: [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md)
+Details: [SAVEPOINT.md](./SAVEPOINT.md) · **Home deploy:** [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) · Remote: [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md)
 
 **Cursor workspace:** `E:\White Lynx Projects\Cursor\whitelynx.code-workspace`
 
@@ -33,6 +30,7 @@ Details: [SAVEPOINT.md](./SAVEPOINT.md) · Deploy: [infra/DEPLOY_AT_HOME.md](./i
 | Auth | https://supadupabase.whitelynx.co.nz/auth/ |
 | Data API | https://supadupabase.whitelynx.co.nz/rest/v1/… |
 | Mail | https://supadupabase.whitelynx.co.nz/mail/… |
+| Deploy hook | `POST /hooks/deploy` (after setup) |
 | Timesheet PWA | https://timesheet.whitelynx.co.nz |
 
 ## Quick start (local)
@@ -64,9 +62,9 @@ npm run dev
 | Mail | SMTP outbound (timesheet email, admin test send, invite emails) |
 | SDK | `@supadupabase/sdk` — zero runtime deps |
 | Admin | Users (invite/ban), projects, API keys, emails |
-| Deploy | Docker Compose + Caddy + Cloudflare Tunnel |
+| Deploy | Docker Compose + Caddy + Cloudflare Tunnel + optional **remote webhook** |
 
-**Not Supabase (yet):** no Storage, Realtime, Edge Functions, SQL editor, or dynamic table API. New tables require SQL migrations and a data-api whitelist update.
+**Not Supabase (yet):** no Storage, Realtime, Edge Functions, SQL editor, or dynamic table API.
 
 ## In-house stack
 
@@ -82,17 +80,18 @@ npm run dev
 ## Production
 
 - **Domain:** https://supadupabase.whitelynx.co.nz
-- **VM:** Proxmox VM106 — see [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md)
-- **Remote deploy:** [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md) — deploy from anywhere via Cloudflare
-- **SMTP:** Gmail App Password in `.env` (`SMTP_*` vars)
-- **Invite-only:** `INVITE_ONLY=1` in `.env` (passed to `auth-service` via compose)
-
-After code changes on the VM:
+- **VM:** Proxmox VM106 — [infra/DEPLOY_AT_HOME.md](./infra/DEPLOY_AT_HOME.md)
+- **At home:** [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md) — SSH deploy from GitHub
+- **Away from home:** [infra/REMOTE_DEPLOY.md](./infra/REMOTE_DEPLOY.md) — after hook setup
+- **GitHub Actions:** [.github/DEPLOY_FROM_GITHUB.md](./.github/DEPLOY_FROM_GITHUB.md)
+- **Invite-only:** `INVITE_ONLY=1` in `.env`
 
 ```bash
-cd ~/supadupabase
-git pull
-DOCKER_BUILDKIT=0 docker compose -f infra/docker-compose.yml --env-file .env up -d --build
+# On VM (or home PC SSH one-liner — see HOME_PC_SETUP.md)
+cd ~/supadupabase && git pull && ./infra/deploy-quick.sh
+
+# From dev PC after hooks enabled
+npm run deploy:remote
 ```
 
 ## Client usage

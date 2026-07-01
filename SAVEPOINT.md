@@ -1,22 +1,23 @@
-# Save point — v0.2.2-production
+# Save point — v0.3.0-development
 
-**Date:** 2026-06-30  
-**Git tag:** `v0.2.2-production`  
+**Date:** 2026-06-27  
+**Git commit:** `2ee9aae` (main)  
 **Repository:** https://github.com/johngoodspeed77/supadupabase  
-**Branch:** `main`
+**Branch:** `main`  
+**Previous tag:** `v0.2.2-production`
 
 ## Milestone summary
 
-**Production stable** on VM106. Timesheet PWA on VM101 at **v0.3.1-production** integration (PWA `v0.3.0-production`, mail improvements below). Leave-entry schema (migration 009), boss timesheet email from the submitting employee, and **Fuzed Group** email branding deployed.
+**Code on GitHub; VM deploy pending.** Since `v0.2.2-production`: Google OAuth removed (email/password + invite-only only), **remote deploy** via HTTPS webhooks (`deploy-hook`), home PC setup guide, and GitHub Actions workflow. Timesheet consumer at **v0.3.2-development** (dirty Save UI) also on GitHub — not yet on VM101.
 
-## Production (live)
+## Production (live — last deployed tag)
 
 | Item | Value |
 |------|--------|
 | Public URL | https://supadupabase.whitelynx.co.nz |
-| Admin | https://supadupabase.whitelynx.co.nz/admin/ |
+| Last deployed tag | `v0.2.2-production` |
 | VM | `supadupabase@192.168.1.112` (VM106) |
-| Timesheet consumer | https://timesheet.whitelynx.co.nz (VM101) |
+| Timesheet consumer | https://timesheet.whitelynx.co.nz (VM101, last deployed `v0.3.1-production`) |
 | Compose | `~/supadupabase`, `infra/docker-compose.yml` + `.env` |
 
 **Health checks:**
@@ -27,99 +28,74 @@ curl https://supadupabase.whitelynx.co.nz/rest/healthz
 curl https://supadupabase.whitelynx.co.nz/mail/healthz
 ```
 
-**Redeploy after code changes on VM:**
-
-```bash
-cd ~/supadupabase
-git pull
-DOCKER_BUILDKIT=0 docker compose -f infra/docker-compose.yml --env-file .env up -d --build
-```
-
-Rebuild specific services when needed:
-
-```bash
-docker compose -f infra/docker-compose.yml --env-file .env up -d --build auth-service admin mail-service data-api
-```
-
-## What works
-
-### Core
-
-- Auth: email/password, JWT sessions, refresh (`INVITE_ONLY=1` blocks new sign-ups in prod)
-- **Invite-only mode** — `INVITE_ONLY=1` in `.env`; admin creates users via Users → Invite
-- Data API: REST CRUD with JWT + RLS; **per-user row scoping** enforced server-side
-- Admin: projects, **Users** (list, ban, invite, revoke), API keys, Emails test page
-- SDK, SQL migrations `001`–`009`
-- mail-service: SMTP, timesheet submit email (leave rows), Web Push API
-- Docker Compose + Caddy + Cloudflare Tunnel
-
-### Since v0.2.1-production
+## What’s new on `main` (not yet on VM)
 
 | Commit | Summary |
 |--------|---------|
-| `4b138df` | Leave types on `time_entries`; timesheet email template for leave rows |
-| `92c1e2b` | Timesheet submit **From** = `"Employee Name" <user@email>`; **Reply-To** = user email; SMTP envelope `MAIL FROM` stays `SMTP_FROM` |
-| `fe60026` | Boss email title/footer → **Fuzed Group- Employee Weekly Timesheet** (`TIMESHEET_EMAIL_TITLE`) |
-| *(this release)* | Email subject **Week ending** + Sunday date (not Week of Monday) |
+| `76be153` | **Remove Google OAuth** — routes, config, UI, SDK `signInWithGoogle` |
+| `9fdc6aa` | **`deploy-hook`** service, `deploy-quick.sh`, `REMOTE_DEPLOY.md`, `npm run deploy:remote` |
+| `2ee9aae` | **`HOME_PC_SETUP.md`**, `enable-remote-deploy.sh`, `.github/DEPLOY_FROM_GITHUB.md` |
 
-### Since v0.2.0-production-alpha
+### Remote deploy (code ready; hooks not enabled on VMs yet)
 
-| Commit | Summary |
-|--------|---------|
-| `3382719` | Per-user row scoping in data-api |
-| `38155a8` | Persistent auth sessions docs |
-| `51950f1` | Admin user management + invites (`008_user_management.sql`) |
-| `bf30c50` | Admin auth module path behind `/admin` proxy |
-| `4b923e1` | Admin refresh without false logout |
-| `dcbdf4c` | `INVITE_ONLY` flag on auth-service |
-| `1c5c329` | Wire `INVITE_ONLY` through docker-compose |
+| Piece | Status |
+|-------|--------|
+| `apps/deploy-hook` | In repo |
+| `POST /hooks/deploy` via Caddy | Needs `--profile remote` on VM106 |
+| `DEPLOY_HOOK_SECRET` | Not set on VMs until home setup |
+| GitHub Actions `deploy.yml` | Ready; needs repo secret |
+| VM101 `/hooks/*` Cloudflare path | Needs one-time tunnel rule → port 5189 |
 
-## Migrations (repo)
+See [infra/HOME_PC_SETUP.md](./infra/HOME_PC_SETUP.md).
 
-`001_init` → `009_leave_entries` — apply on VM with migrate profile or `npm run migrate`.
+## What still works (unchanged on live VM)
 
-Migration **009** adds `entry_type`, `leave_type`, `leave_duration`, nullable times + CHECK constraints for leave/work rows.
+- Auth: email/password, JWT, refresh, **`INVITE_ONLY=1`**
+- Data API: REST + RLS + per-user scoping
+- Admin: Users invite/ban, API keys, Emails test
+- mail-service: timesheet submit, Fuzed Group branding, leave rows
+- Migrations `001`–`009`
 
-## Timesheet submit email behaviour
+## Deploy pending changes
 
-| Header / field | Value |
-|----------------|--------|
-| `From` (display) | `"Employee Name" <user@email>` from `user_settings.employee_name` or email local-part |
-| `Reply-To` | Submitting user's login email |
-| SMTP `MAIL FROM` | `SMTP_FROM` (Gmail account on VM106) |
-| Email title (HTML) | **Fuzed Group- Employee Weekly Timesheet** |
-| Subject | `Timesheet — {name} — Week ending {Sunday DD/MM/YYYY}` |
+**At home (LAN):**
 
-Gmail may show "via gmail.com" when the `From` domain is not a verified send-as alias; replies still go to the employee via `Reply-To`.
+```bash
+ssh supadupabase@192.168.1.112
+cd ~/supadupabase && git pull && chmod +x infra/deploy-quick.sh && ./infra/deploy-quick.sh
+```
 
-## Environment variables (production `.env`)
+**Enable remote deploy (once):**
+
+```bash
+# Add DEPLOY_HOOK_SECRET to .env, then:
+./infra/enable-remote-deploy.sh
+```
+
+**From GitHub Actions:** Actions → Remote deploy (after `DEPLOY_HOOK_SECRET` secret + hooks live).
+
+## Environment variables (additions)
 
 | Variable | Purpose |
 |----------|---------|
-| `POSTGRES_PASSWORD`, `AUTH_SECRET` | Required |
-| `JWT_ISSUER`, `PUBLIC_URL` | `https://supadupabase.whitelynx.co.nz` |
-| `ADMIN_EMAILS` | Admin login allowlist |
-| `INVITE_ONLY` | `1` — block public sign-up |
-| `TUNNEL_TOKEN` | cloudflared profile |
-| `SMTP_*` | Gmail outbound mail (`SMTP_FROM` = envelope sender) |
-| `VAPID_*` | Web Push (mail-service) |
-| `TIMESHEET_PUBLIC_URL` | `https://timesheet.whitelynx.co.nz` (invite links) |
+| `DEPLOY_HOOK_SECRET` | Bearer token for `POST /hooks/deploy` (generate: `openssl rand -base64 32`) |
 
-Never commit `.env` or tunnel tokens.
+Removed from docs/examples: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
 ## Known follow-up
 
-- Data API: anon/service key auth on `/rest`; RPC
-- Weekly push reminder cron fully verified in prod
-- Integration tests (RLS + JWT, submit flow)
-- License
+- Deploy `main` to VM106 (+ timesheet `main` to VM101)
+- One-time remote deploy hook setup on both VMs
+- Data API: anon/service key auth; RPC
+- Weekly push reminder cron verification
+- Integration tests; license
 
 ## Restore / run locally
 
 ```bash
 git clone https://github.com/johngoodspeed77/supadupabase.git
 cd supadupabase
-git checkout v0.2.2-production
+git checkout main   # or v0.2.2-production for last tagged release
 npm install && npm run build
 cp .env.example .env
 docker compose -f infra/docker-compose.dev.yml up -d
@@ -129,4 +105,4 @@ npm run dev
 
 ## Last updated
 
-2026-06-30
+2026-06-27 — Save point v0.3.0-development: OAuth removed, remote deploy + home PC setup (`2ee9aae`).

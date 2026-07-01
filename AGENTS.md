@@ -1,6 +1,6 @@
 # Agent instructions
 
-Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first.
+Read **[AGENT_HANDOFF.md](./AGENT_HANDOFF.md)** first. Save point: **v0.3.0-development** ([SAVEPOINT.md](./SAVEPOINT.md)).
 
 ## Non-negotiables
 
