@@ -134,6 +134,7 @@ services:
       context: ..
       dockerfile: infra/Dockerfile.deploy-hook
     restart: unless-stopped
+    user: "1000:124"
     environment:
       DEPLOY_HOOK_SECRET: ${DEPLOY_HOOK_SECRET:-}
       DEPLOY_HOOK_PORT: "3005"
