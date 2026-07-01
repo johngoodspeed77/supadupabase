@@ -102,7 +102,7 @@ async function deployOne(name) {
   } catch {
     body = { raw: text };
   }
-  if (!res.ok) {
+  if (!res.ok && res.status !== 202) {
     console.error(JSON.stringify(body, null, 2));
     throw new Error(`${name} deploy failed: HTTP ${res.status}`);
   }

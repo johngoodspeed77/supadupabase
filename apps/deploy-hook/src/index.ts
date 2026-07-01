@@ -76,33 +76,35 @@ router.post('/hooks/deploy', async (ctx) => {
   }
 
   const body = ctx.body as { services?: string; migrate?: boolean } | null;
-  if (body?.migrate) {
-    process.env.DEPLOY_MIGRATE = '1';
-  }
-
-  deploying = true;
   const started = new Date().toISOString();
+  deploying = true;
   console.log(`[deploy-hook] deploy started at ${started}`);
 
-  try {
-    const result = await runDeploy(body?.services);
-    const ok = result.code === 0;
-    console.log(`[deploy-hook] deploy finished code=${result.code}`);
-    jsonResponse(ctx, ok ? 200 : 500, {
-      ok,
-      started,
-      finished: new Date().toISOString(),
-      exit_code: result.code,
-      stdout: tail(result.stdout),
-      stderr: tail(result.stderr),
-    });
-  } catch (err) {
-    console.error('[deploy-hook] deploy failed', err);
-    errorResponse(ctx, 500, 'Deploy script failed to start', 'deploy_failed');
-  } finally {
-    deploying = false;
-    delete process.env.DEPLOY_MIGRATE;
-  }
+  // Respond before docker rebuild — Cloudflare tunnel times out on long requests.
+  jsonResponse(ctx, 202, {
+    ok: true,
+    accepted: true,
+    started,
+    message: 'Deploy started in background',
+  });
+
+  void (async () => {
+    if (body?.migrate) {
+      process.env.DEPLOY_MIGRATE = '1';
+    }
+    try {
+      const result = await runDeploy(body?.services);
+      console.log(`[deploy-hook] deploy finished code=${result.code}`);
+      if (result.code !== 0) {
+        console.error('[deploy-hook] deploy stderr tail:', tail(result.stderr));
+      }
+    } catch (err) {
+      console.error('[deploy-hook] deploy failed', err);
+    } finally {
+      deploying = false;
+      delete process.env.DEPLOY_MIGRATE;
+    }
+  })();
 });
 
 if (!secret) {
